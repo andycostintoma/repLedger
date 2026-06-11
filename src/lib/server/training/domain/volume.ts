@@ -1,10 +1,11 @@
 import type { MuscleVolumeFact, TrainingMethod } from '../types';
+import { muscleGroups, type MuscleGroup } from './muscles';
 import { getLoggedSetEquivalents } from './sets';
 
 type VolumeExercise = {
   templateExerciseId: string;
   method: TrainingMethod;
-  coefficients: Record<string, number>;
+  coefficients: Partial<Record<MuscleGroup, number>>;
 };
 
 type LoggedSetRef = {
@@ -12,21 +13,21 @@ type LoggedSetRef = {
 };
 
 export const getMusclesForExercises = (exercises: VolumeExercise[]) =>
-  [...new Set(exercises.flatMap((exercise) => Object.keys(exercise.coefficients)))].sort();
+  muscleGroups.filter((muscle) => exercises.some((exercise) => exercise.coefficients[muscle] !== undefined));
 
 export const buildMuscleVolumeFacts = (input: {
   exercises: VolumeExercise[];
   savedSets: LoggedSetRef[];
-  priorWeekVolume: Record<string, number>;
+  priorWeekVolume: Partial<Record<MuscleGroup, number>>;
 }): MuscleVolumeFact[] => {
-  const sessionVolume = new Map<string, number>();
+  const sessionVolume = new Map<MuscleGroup, number>();
 
   input.exercises.forEach((exercise) => {
     const loggedSetCount = input.savedSets.filter((set) => set.templateExerciseId === exercise.templateExerciseId).length;
     const setEquivalents = getLoggedSetEquivalents(exercise.method, loggedSetCount);
 
-    Object.entries(exercise.coefficients).forEach(([muscle, coefficient]) => {
-      sessionVolume.set(muscle, (sessionVolume.get(muscle) ?? 0) + setEquivalents * coefficient);
+    getMusclesForExercises([exercise]).forEach((muscle) => {
+      sessionVolume.set(muscle, (sessionVolume.get(muscle) ?? 0) + setEquivalents * (exercise.coefficients[muscle] ?? 0));
     });
   });
 

@@ -2,13 +2,17 @@
   import { invalidateAll } from '$app/navigation';
   import { equipmentTypes, isEquipmentType } from '$lib/training/equipment';
   import { muscleTone } from '$lib/training/presentation';
-  import { addExercise } from './exercises.remote';
+  import { addExercise, saveExerciseMuscles, saveExerciseName } from './exercises.remote';
+
+  import type { MuscleGroup } from '$lib/server/training/domain/muscles';
 
   let { data } = $props();
 
   let savingCatalog = $state<string | null>(null);
   let saveError = $state<string | null>(null);
   let showAddExercise = $state(false);
+  let showEditName = $state(false);
+  let showEditMuscles = $state(false);
   let exerciseFilter = $state('');
   let exerciseEquipmentFilter = $state('all');
   let exerciseMuscleFilter = $state('all');
@@ -22,12 +26,12 @@
 
     return data.catalog.exercises.filter((exercise) =>
       (equipment === 'all' || exercise.equipment === equipment) &&
-      (muscle === 'all' || exercise.primaryMuscle.toLowerCase() === muscle) &&
-      (query.length === 0 || `${exercise.name} ${exercise.primaryMuscle} ${exercise.equipment}`.toLowerCase().includes(query))
+      (muscle === 'all' || exercise.muscleCoefficients.some((coefficient) => coefficient.muscle.toLowerCase() === muscle)) &&
+      (query.length === 0 || `${exercise.name} ${exercise.muscleCoefficients.map((coefficient) => coefficient.muscle).join(' ')} ${exercise.equipment}`.toLowerCase().includes(query))
     );
   };
 
-  const exerciseMuscleOptions = () => ['all', ...new Set(data.catalog.exercises.map((exercise) => exercise.primaryMuscle))];
+  const exerciseMuscleOptions = () => ['all', ...data.catalog.muscleGroups];
 
   const resetExerciseFilters = () => {
     exerciseFilter = '';
@@ -46,6 +50,7 @@
     saveError = null;
 
     const equipmentValue = String(formData.get('equipment') ?? '').trim();
+    const primaryMuscleValue = String(formData.get('primaryMuscle') ?? '').trim();
 
     if (!isEquipmentType(equipmentValue)) {
       savingCatalog = null;
@@ -53,9 +58,15 @@
       return;
     }
 
+    if (!data.catalog.muscleGroups.includes(primaryMuscleValue as MuscleGroup)) {
+      savingCatalog = null;
+      saveError = 'Choose a valid muscle group.';
+      return;
+    }
+
     const result = await addExercise({
       name: String(formData.get('name') ?? '').trim(),
-      primaryMuscle: String(formData.get('primaryMuscle') ?? '').trim(),
+      primaryMuscle: primaryMuscleValue as MuscleGroup,
       equipment: equipmentValue
     });
 
@@ -70,37 +81,165 @@
     showAddExercise = false;
     await invalidateAll();
   };
+
+  const formMuscles = (formData: FormData, field: string) =>
+    [...new Set(formData.getAll(field).map((value) => String(value).trim()))].filter((value): value is MuscleGroup => data.catalog.muscleGroups.includes(value as MuscleGroup));
+
+  const saveExerciseMuscleGroups = async (exerciseId: string, event: SubmitEvent) => {
+    event.preventDefault();
+
+    if (!(event.currentTarget instanceof HTMLFormElement)) return;
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const primaryMuscles = formMuscles(formData, 'primaryMuscles');
+    const secondaryMuscles = formMuscles(formData, 'secondaryMuscles');
+
+    if (primaryMuscles.length === 0) {
+      saveError = 'Choose at least one primary muscle group.';
+      return;
+    }
+
+    savingCatalog = 'exercise-muscles';
+    saveError = null;
+
+    const result = await saveExerciseMuscles({ exerciseId, primaryMuscles, secondaryMuscles });
+
+    savingCatalog = null;
+
+    if (!result.ok) {
+      saveError = result.error;
+      return;
+    }
+
+    showEditMuscles = false;
+    await invalidateAll();
+  };
+
+  const saveExerciseDisplayName = async (exerciseId: string, event: SubmitEvent) => {
+    event.preventDefault();
+
+    if (!(event.currentTarget instanceof HTMLFormElement)) return;
+
+    const form = event.currentTarget;
+    const name = String(new FormData(form).get('name') ?? '').trim();
+
+    if (name.length === 0) {
+      saveError = 'Exercise name is required.';
+      return;
+    }
+
+    savingCatalog = 'exercise-name';
+    saveError = null;
+
+    const result = await saveExerciseName({ exerciseId, name });
+
+    savingCatalog = null;
+
+    if (!result.ok) {
+      saveError = result.error;
+      return;
+    }
+
+    showEditName = false;
+    await invalidateAll();
+  };
 </script>
 
 <svelte:head>
   <title>Exercises</title>
 </svelte:head>
 
-<section class="px-4 pb-6 pt-5">
+<section class="w-full overflow-x-hidden px-4 pb-6 pt-5">
   {#if selectedExercise()}
     {@const exercise = selectedExercise()}
     {#if exercise}
       <header class="sticky top-0 z-10 -mx-4 border-b border-white/10 bg-neutral-950/95 px-4 pb-3 pt-2 backdrop-blur">
         <a class="rounded-full bg-neutral-900 px-4 py-2 text-sm font-black text-neutral-200 ring-1 ring-white/10" href="/exercises">← Exercises</a>
-        <span class={`mt-4 inline-block rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.16em] ring-1 ${muscleTone(exercise.primaryMuscle)}`}>{exercise.primaryMuscle}</span>
-        <h1 class="mt-3 text-3xl font-black tracking-tight">{exercise.name}</h1>
-        <p class="mt-1 text-sm text-neutral-400">{exercise.equipment}</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          {#each exercise.primaryMuscles as muscle}
+            <span class={`inline-block rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.16em] ring-1 ${muscleTone(muscle)}`}>{muscle}</span>
+          {/each}
+        </div>
+        {#if showEditName}
+          <form class="mt-3 grid gap-2" onsubmit={(event) => saveExerciseDisplayName(exercise.id, event)}>
+            <input class="w-full rounded-2xl border border-cyan-300/40 bg-neutral-950 px-3 py-3 text-2xl font-black tracking-tight text-neutral-100 outline-none focus:border-cyan-300" name="name" value={exercise.name} required />
+            <div class="grid grid-cols-2 gap-2">
+              <button class="rounded-2xl bg-cyan-300 px-4 py-3 font-black text-neutral-950 disabled:opacity-60" disabled={savingCatalog === 'exercise-name'} type="submit">{savingCatalog === 'exercise-name' ? 'Saving...' : 'Save'}</button>
+              <button class="rounded-2xl bg-neutral-900 px-4 py-3 font-black text-neutral-200 ring-1 ring-white/10" type="button" onclick={() => (showEditName = false)}>Cancel</button>
+            </div>
+          </form>
+        {:else}
+          <div class="mt-3 flex items-start justify-between gap-3">
+            <h1 class="min-w-0 text-3xl font-black tracking-tight">{exercise.name}</h1>
+            <button class="shrink-0 rounded-full bg-neutral-900 px-3 py-2 text-xs font-black text-neutral-200 ring-1 ring-white/10" type="button" onclick={() => (showEditName = true)}>Edit name</button>
+          </div>
+        {/if}
       </header>
+      {#if saveError}
+        <p class="mt-3 rounded-2xl bg-red-500/10 p-3 text-sm text-red-200 ring-1 ring-red-400/30">{saveError}</p>
+      {/if}
 
       <section class="mt-4 grid gap-3">
         <article class="rounded-3xl bg-neutral-900 p-4 ring-1 ring-white/10">
-          <h2 class="text-lg font-black">Exercise facts</h2>
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-lg font-black">Exercise facts</h2>
+            <button class="rounded-full bg-cyan-300 px-3 py-2 text-xs font-black text-neutral-950" type="button" onclick={() => (showEditMuscles = !showEditMuscles)}>{showEditMuscles ? 'Close edit' : 'Edit muscles'}</button>
+          </div>
           <div class="mt-3 grid gap-2 text-sm">
-            <div class="flex justify-between rounded-2xl bg-neutral-950 px-3 py-3 ring-1 ring-white/5">
-              <span class="text-neutral-500">Primary muscle</span>
-              <span class="font-black text-neutral-100">{exercise.primaryMuscle}</span>
+            <div class="rounded-2xl bg-neutral-950 px-3 py-3 ring-1 ring-white/5">
+              <span class="text-neutral-500">Primary / strong muscles</span>
+              <div class="mt-2 flex flex-wrap gap-2">
+                {#each exercise.primaryMuscles as muscle}
+                  <span class={`rounded-full px-3 py-1 text-xs font-black ring-1 ${muscleTone(muscle)}`}>{muscle}</span>
+                {/each}
+              </div>
+            </div>
+            <div class="rounded-2xl bg-neutral-950 px-3 py-3 ring-1 ring-white/5">
+              <span class="text-neutral-500">Secondary muscles</span>
+              {#if exercise.secondaryMuscles.length === 0}
+                <p class="mt-2 text-sm font-bold text-neutral-400">None counted</p>
+              {:else}
+                <div class="mt-2 flex flex-wrap gap-2">
+                  {#each exercise.secondaryMuscles as muscle}
+                    <span class={`rounded-full px-3 py-1 text-xs font-black ring-1 ${muscleTone(muscle)}`}>{muscle} · 0.5</span>
+                  {/each}
+                </div>
+              {/if}
             </div>
             <div class="flex justify-between rounded-2xl bg-neutral-950 px-3 py-3 ring-1 ring-white/5">
               <span class="text-neutral-500">Equipment</span>
               <span class="font-black text-neutral-100">{exercise.equipment}</span>
             </div>
           </div>
-          <p class="mt-4 rounded-2xl bg-cyan-300/10 p-3 text-sm text-cyan-100 ring-1 ring-cyan-200/20">Method and rep range are assigned when this exercise is placed into a workout or template.</p>
+          {#if showEditMuscles}
+            <form class="mt-4 grid gap-4 rounded-3xl bg-neutral-950 p-4 ring-1 ring-cyan-300/20" onsubmit={(event) => saveExerciseMuscleGroups(exercise.id, event)}>
+              <div>
+                <p class="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">Primary / strong</p>
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                  {#each data.catalog.muscleGroups as muscle}
+                    <label class="flex min-w-0 items-center gap-2 rounded-2xl bg-neutral-900 px-3 py-2 text-xs font-bold text-neutral-200 ring-1 ring-white/10">
+                      <input class="accent-cyan-300" type="checkbox" name="primaryMuscles" value={muscle} checked={exercise.primaryMuscles.includes(muscle)} />
+                      <span class="min-w-0 truncate">{muscle}</span>
+                    </label>
+                  {/each}
+                </div>
+              </div>
+              <div>
+                <p class="text-xs font-black uppercase tracking-[0.18em] text-emerald-300">Secondary · 0.5</p>
+                <p class="mt-1 text-xs text-neutral-500">If a muscle is checked as both primary and secondary, primary wins.</p>
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                  {#each data.catalog.muscleGroups as muscle}
+                    <label class="flex min-w-0 items-center gap-2 rounded-2xl bg-neutral-900 px-3 py-2 text-xs font-bold text-neutral-200 ring-1 ring-white/10">
+                      <input class="accent-emerald-300" type="checkbox" name="secondaryMuscles" value={muscle} checked={exercise.secondaryMuscles.includes(muscle)} />
+                      <span class="min-w-0 truncate">{muscle}</span>
+                    </label>
+                  {/each}
+                </div>
+              </div>
+              <button class="rounded-2xl bg-cyan-300 px-4 py-3 font-black text-neutral-950 disabled:opacity-60" disabled={savingCatalog === 'exercise-muscles'} type="submit">{savingCatalog === 'exercise-muscles' ? 'Saving...' : 'Save muscle groups'}</button>
+            </form>
+          {/if}
         </article>
 
         <article class="rounded-3xl bg-neutral-900 p-4 ring-1 ring-white/10">
@@ -147,7 +286,7 @@
       <p class="mt-3 rounded-2xl bg-red-500/10 p-3 text-sm text-red-200 ring-1 ring-red-400/30">{saveError}</p>
     {/if}
     <input class="mt-4 w-full rounded-2xl border border-white/10 bg-neutral-900 px-4 py-3 outline-none focus:border-cyan-300" bind:value={exerciseFilter} placeholder="Search exercises" />
-    <div class="mt-3 flex gap-2 overflow-x-auto pb-1 text-xs font-black uppercase tracking-wide">
+    <div class="scrollbar-none -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 text-xs font-black uppercase tracking-wide">
       <button class={`rounded-full px-3 py-2 ${exerciseEquipmentFilter === 'all' ? 'bg-cyan-300 text-neutral-950' : 'bg-neutral-900 text-neutral-300 ring-1 ring-white/10'}`} type="button" onclick={() => (exerciseEquipmentFilter = 'all')}>All</button>
       {#each equipmentTypes as equipment}
         <button class={`rounded-full px-3 py-2 ${exerciseEquipmentFilter === equipment ? 'bg-cyan-300 text-neutral-950' : 'bg-neutral-900 text-neutral-300 ring-1 ring-white/10'}`} type="button" onclick={() => (exerciseEquipmentFilter = equipment)}>{equipment}</button>
@@ -165,7 +304,11 @@
       <form class="mt-4 rounded-3xl bg-neutral-900 p-4 ring-1 ring-white/10" onsubmit={saveExerciseLibraryItem}>
         <input class="w-full rounded-2xl border border-white/10 bg-neutral-950 px-3 py-3 outline-none focus:border-cyan-300" name="name" placeholder="Exercise name" required />
         <div class="mt-2 grid grid-cols-2 gap-2">
-          <input class="rounded-2xl border border-white/10 bg-neutral-950 px-3 py-3 outline-none focus:border-cyan-300" name="primaryMuscle" placeholder="Primary muscle" required />
+          <select class="rounded-2xl border border-white/10 bg-neutral-950 px-3 py-3 outline-none focus:border-cyan-300" name="primaryMuscle" required>
+            {#each data.catalog.muscleGroups as muscle}
+              <option value={muscle}>{muscle}</option>
+            {/each}
+          </select>
           <select class="rounded-2xl border border-white/10 bg-neutral-950 px-3 py-3 outline-none focus:border-cyan-300" name="equipment" required>
             {#each equipmentTypes as equipment}
               <option value={equipment}>{equipment}</option>
@@ -182,12 +325,16 @@
         <button class="mt-4 rounded-2xl bg-neutral-800 px-4 py-3 text-sm font-black text-neutral-100 ring-1 ring-white/10" type="button" onclick={resetExerciseFilters}>Reset filters</button>
       </div>
     {:else}
-      <div class="mt-4 grid gap-3">
+      <div class="mt-4 grid min-w-0 gap-3">
         {#each filteredExercises() as exercise}
-          <a class="rounded-3xl bg-neutral-900 p-4 text-left ring-1 ring-white/10 transition hover:bg-neutral-800" href={`/exercises?exercise=${exercise.id}`}>
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <span class={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.16em] ring-1 ${muscleTone(exercise.primaryMuscle)}`}>{exercise.primaryMuscle}</span>
+          <a class="min-w-0 rounded-3xl bg-neutral-900 p-4 text-left shadow-lg shadow-black/10 ring-1 ring-white/10 transition hover:bg-neutral-800" href={`/exercises?exercise=${exercise.id}`}>
+            <div class="flex min-w-0 items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex flex-wrap gap-2">
+                  {#each exercise.primaryMuscles as muscle}
+                    <span class={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.16em] ring-1 ${muscleTone(muscle)}`}>{muscle}</span>
+                  {/each}
+                </div>
                 <h2 class="mt-3 text-lg font-black">{exercise.name}</h2>
                 <p class="mt-1 text-sm text-neutral-400">{exercise.equipment}</p>
               </div>

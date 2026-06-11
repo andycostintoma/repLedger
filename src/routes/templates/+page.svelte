@@ -86,7 +86,7 @@
   <title>Templates</title>
 </svelte:head>
 
-<section class="px-4 pb-6 pt-5">
+<section class="w-full overflow-x-hidden px-4 pb-6 pt-5">
   {#if selectedTemplate()}
     {@const template = selectedTemplate()}
     {#if template}
@@ -134,7 +134,7 @@
       <p class="mt-3 rounded-2xl bg-red-500/10 p-3 text-sm text-red-200 ring-1 ring-red-400/30">{saveError}</p>
     {/if}
     <input class="mt-4 w-full rounded-2xl border border-white/10 bg-neutral-900 px-4 py-3 outline-none focus:border-cyan-300" bind:value={templateFilter} placeholder="Search templates" />
-    <div class="mt-3 flex gap-2 overflow-x-auto pb-1 text-xs font-black uppercase tracking-wide">
+    <div class="scrollbar-none -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 text-xs font-black uppercase tracking-wide">
       <button class={`rounded-full px-3 py-2 ${templateCategoryFilter === 'all' ? 'bg-cyan-300 text-neutral-950' : 'bg-neutral-900 text-neutral-300 ring-1 ring-white/10'}`} type="button" onclick={() => (templateCategoryFilter = 'all')}>All</button>
       <button class={`rounded-full px-3 py-2 ${templateCategoryFilter === 'Hypertrophy' ? 'bg-cyan-300 text-neutral-950' : 'bg-neutral-900 text-neutral-300 ring-1 ring-white/10'}`} type="button" onclick={() => (templateCategoryFilter = 'Hypertrophy')}>Hypertrophy</button>
       <button class={`rounded-full px-3 py-2 ${templateCategoryFilter === 'Base' ? 'bg-cyan-300 text-neutral-950' : 'bg-neutral-900 text-neutral-300 ring-1 ring-white/10'}`} type="button" onclick={() => (templateCategoryFilter = 'Base')}>Base</button>
@@ -161,7 +161,7 @@
     {:else}
       <div class="mt-4 grid gap-3">
         {#each filteredTemplates() as template}
-          <a class="rounded-3xl bg-neutral-900 p-4 text-left ring-1 ring-white/10 transition hover:bg-neutral-800" href={`/templates?template=${template.id}`}>
+          <a class="min-w-0 rounded-3xl bg-neutral-900 p-4 text-left shadow-lg shadow-black/10 ring-1 ring-white/10 transition hover:bg-neutral-800" href={`/templates?template=${template.id}`}>
             <p class="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">{template.category}</p>
             <h2 class="mt-1 text-lg font-black">{template.name}</h2>
             <div class="mt-3 flex flex-wrap gap-2 text-xs font-bold text-neutral-300">

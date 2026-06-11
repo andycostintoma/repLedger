@@ -67,7 +67,7 @@
   <title>Mesos</title>
 </svelte:head>
 
-<section class="px-4 pb-6 pt-5">
+<section class="w-full overflow-x-hidden px-4 pb-6 pt-5">
   {#if selectedMeso()}
     {@const mesocycle = selectedMeso()}
     {#if mesocycle}
@@ -83,7 +83,7 @@
         </div>
       </header>
 
-      <section class="mt-4 rounded-[1.6rem] bg-neutral-900 p-4 ring-1 ring-white/10" aria-label="Mesocycle calendar">
+      <section class="mt-4 overflow-hidden rounded-[1.6rem] bg-neutral-900 p-4 ring-1 ring-white/10" aria-label="Mesocycle calendar">
         <div class="flex items-center justify-between gap-3">
           <div>
             <p class="text-sm text-neutral-400">Weeks</p>
@@ -92,7 +92,7 @@
           <span class="rounded-full bg-neutral-950 px-3 py-1 text-xs font-black text-neutral-300 ring-1 ring-white/10">{mesocycle.latestSession ?? 'no sessions'}</span>
         </div>
 
-        <div class="mt-4 overflow-x-auto pb-1">
+        <div class="scrollbar-none -mx-4 mt-4 overflow-x-auto px-4 pb-1">
           <div class="grid min-w-max gap-2" style={`grid-template-columns: repeat(${mesocycle.weeks}, minmax(4.25rem, 1fr));`}>
             {#each mesoWeeks(mesocycle) as week}
               <div class="text-center">
@@ -119,22 +119,22 @@
         {@const session = selectedMesoSession()}
         {#if session}
           <section class="mt-5" aria-label="Selected mesocycle day">
-            <article class="rounded-3xl bg-neutral-900 p-4 ring-1 ring-white/10">
-              <div class="flex items-start justify-between gap-3">
-                <div>
+            <article class="min-w-0 rounded-3xl bg-neutral-900 p-4 ring-1 ring-white/10">
+              <div class="flex min-w-0 items-start justify-between gap-3">
+                <div class="min-w-0">
                   <p class="text-xs font-black uppercase tracking-[0.18em] text-neutral-500">W{session.weekNumber ?? '?'} D{session.dayNumber ?? '?'}</p>
                   <h2 class="mt-1 text-2xl font-black">{session.name}</h2>
                   <p class="mt-1 text-sm text-neutral-400">{session.trainingDate ? `${session.trainingDate} · ` : ''}{session.status} · {session.totalSets} sets</p>
                 </div>
-                <span class="rounded-full bg-neutral-950 px-3 py-1 text-xs font-bold text-neutral-300 ring-1 ring-white/10">{session.exercises.length} exercises</span>
+                <span class="shrink-0 rounded-full bg-neutral-950 px-3 py-1 text-xs font-bold text-neutral-300 ring-1 ring-white/10">{session.exercises.length} exercises</span>
               </div>
 
               <div class="mt-4 grid gap-3">
                 {#each session.exercises as exercise}
-                  <details class="rounded-2xl bg-neutral-950 p-3 ring-1 ring-white/5">
+                  <details class="min-w-0 rounded-2xl bg-neutral-950 p-3 ring-1 ring-white/5">
                     <summary class="cursor-pointer list-none">
-                      <div class="flex items-start justify-between gap-3">
-                        <div>
+                      <div class="flex min-w-0 items-start justify-between gap-3">
+                        <div class="min-w-0">
                           <span class={`rounded-full px-2 py-1 text-[0.65rem] font-black uppercase tracking-[0.12em] ring-1 ${muscleTone(exercise.primaryMuscle)}`}>{exercise.primaryMuscle}</span>
                           <h3 class="mt-2 text-base font-black text-neutral-100">{exercise.name}</h3>
                           <p class="mt-1 text-sm text-neutral-500">{exercise.equipment} · {exercise.method}</p>
@@ -196,14 +196,14 @@
     {/if}
     <div class="mt-4 grid gap-3">
       {#each data.catalog.mesocycles as mesocycle}
-        <a class="rounded-3xl bg-neutral-900 p-4 text-left ring-1 ring-white/10 transition hover:bg-neutral-800" href={mesoHref(mesocycle)}>
-          <div class="flex items-start justify-between gap-3">
-            <div>
+        <a class="min-w-0 rounded-3xl bg-neutral-900 p-4 text-left ring-1 ring-white/10 transition hover:bg-neutral-800" href={mesoHref(mesocycle)}>
+          <div class="flex min-w-0 items-start justify-between gap-3">
+            <div class="min-w-0">
               <p class="text-xs font-black uppercase tracking-[0.18em] text-neutral-500">{mesocycle.weeks} weeks · {mesocycle.daysPerWeek} days/week</p>
               <h2 class="mt-1 text-lg font-black">{mesocycle.name}</h2>
               <p class="mt-2 text-sm text-neutral-400">{mesocycle.sessionCount} sessions{mesocycle.latestSession ? ` · latest ${mesocycle.latestSession}` : ''}</p>
             </div>
-            <span class={`rounded-full px-3 py-1 text-xs font-black ${mesocycle.status === 'current' ? 'bg-emerald-300 text-neutral-950' : 'bg-neutral-800 text-neutral-300'}`}>{mesocycle.status === 'completed' ? '✓' : mesocycle.status}</span>
+            <span class={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${mesocycle.status === 'current' ? 'bg-emerald-300 text-neutral-950' : 'bg-neutral-800 text-neutral-300'}`}>{mesocycle.status === 'completed' ? '✓' : mesocycle.status}</span>
           </div>
         </a>
       {/each}

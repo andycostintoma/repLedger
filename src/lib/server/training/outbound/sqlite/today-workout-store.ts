@@ -14,6 +14,7 @@ import {
 import { toEquipmentType } from '$lib/training/equipment';
 
 import { buildMuscleFeedbackSuggestion, buildPainSuggestion } from '../../domain/suggestions';
+import type { MuscleGroup } from '../../domain/muscles';
 import { buildMuscleVolumeFacts } from '../../domain/volume';
 import { getLowerBMuscles, lowerBExercises, lowerBPriorWeekVolume, lowerBSessionId, lowerBTemplateId, seedLowerB } from '../../seeds/lower-b';
 import type { SuggestionStatus, TodayWorkout, WorkloadRating } from '../../types';
@@ -48,7 +49,7 @@ export type SaveExerciseFeedbackInput = {
 
 export type SaveMuscleFeedbackInput = {
   sessionId: string;
-  muscle: string;
+  muscle: MuscleGroup;
   soreness: number | null;
   pump: number | null;
   workload: WorkloadRating | null;
@@ -57,7 +58,7 @@ export type SaveMuscleFeedbackInput = {
 
 export type SaveSuggestionInput = {
   sessionId: string;
-  muscle: string;
+  muscle: MuscleGroup;
   suggestion: string;
   status: SuggestionStatus;
 };
@@ -103,29 +104,37 @@ export const getTodayWorkout = async (): Promise<Result<TodayWorkout, TrainingSt
       name: 'Lower B',
       date: savedSession?.trainingDate ?? null,
       status,
-      exercises: plannedExercises.map((exercise) => ({
-        id: exercise.templateExerciseId,
-        exerciseId: exercise.exerciseId,
-        name: exercise.name,
-        equipment: toEquipmentType(exercise.equipment),
-        method: exercise.method,
-        programmedSets: exercise.programmedSets,
-        targetRepRange: exercise.targetRepRange,
-        previousPerformance: getPreviousPerformance(db, exercise.exerciseId),
-        primaryMuscle: lowerBExercises.find((seed) => seed.templateExerciseId === exercise.templateExerciseId)?.primaryMuscle ?? 'unknown',
-        loggedSets: savedSets
-          .filter((set) => set.templateExerciseId === exercise.templateExerciseId)
-          .sort((a, b) => a.setIndex - b.setIndex)
-          .map((set) => ({
-            setIndex: set.setIndex,
-            loadText: set.loadText,
-            reps: set.reps,
-            notes: set.notes,
-            pain: set.pain
-          })),
-        feedback:
-          savedExerciseFeedback.find((feedback) => feedback.templateExerciseId === exercise.templateExerciseId) ?? null
-      })),
+      exercises: plannedExercises.map((exercise) => {
+        const seedExercise = lowerBExercises.find((seed) => seed.templateExerciseId === exercise.templateExerciseId);
+
+        if (!seedExercise) {
+          throw new Error(`Missing domain exercise seed for ${exercise.templateExerciseId}`);
+        }
+
+        return {
+          id: exercise.templateExerciseId,
+          exerciseId: exercise.exerciseId,
+          name: exercise.name,
+          equipment: toEquipmentType(exercise.equipment),
+          method: exercise.method,
+          programmedSets: exercise.programmedSets,
+          targetRepRange: exercise.targetRepRange,
+          previousPerformance: getPreviousPerformance(db, exercise.exerciseId),
+          primaryMuscle: seedExercise.primaryMuscle,
+          loggedSets: savedSets
+            .filter((set) => set.templateExerciseId === exercise.templateExerciseId)
+            .sort((a, b) => a.setIndex - b.setIndex)
+            .map((set) => ({
+              setIndex: set.setIndex,
+              loadText: set.loadText,
+              reps: set.reps,
+              notes: set.notes,
+              pain: set.pain
+            })),
+          feedback:
+            savedExerciseFeedback.find((feedback) => feedback.templateExerciseId === exercise.templateExerciseId) ?? null
+        };
+      }),
       muscles,
       volumeFacts,
       muscleFeedback: muscles.map((muscle) => {
@@ -348,7 +357,7 @@ const localDateString = () => {
 const upsertGeneratedSuggestion = (
   db: TrainingDatabase,
   currentSessionId: string,
-  muscle: string,
+  muscle: MuscleGroup,
   suggestion: string,
   status: SuggestionStatus = 'proposed'
 ) => {

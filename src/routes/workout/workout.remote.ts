@@ -1,4 +1,5 @@
 import { command } from '$app/server';
+import { muscleGroups } from '$lib/server/training/domain/muscles';
 import { training } from '$lib/server/training/module';
 import { z } from 'zod';
 
@@ -41,7 +42,7 @@ export const saveExerciseFeedback = command(saveExerciseFeedbackInput, async (in
 
 const saveMuscleFeedbackInput = z.object({
   sessionId: z.string().min(1),
-  muscle: z.string().min(1),
+  muscle: z.enum(muscleGroups),
   soreness: z.number().int().min(0).max(5).nullable(),
   pump: z.number().int().min(0).max(5).nullable(),
   workload: z.enum(['too-low', 'good', 'too-high']).nullable(),
@@ -60,7 +61,7 @@ export const saveMuscleFeedback = command(saveMuscleFeedbackInput, async (input)
 
 const saveSuggestionInput = z.object({
   sessionId: z.string().min(1),
-  muscle: z.string().min(1),
+  muscle: z.enum(muscleGroups),
   suggestion: z.string().trim().min(1),
   status: z.enum(['proposed', 'accepted', 'ignored', 'edited'])
 });

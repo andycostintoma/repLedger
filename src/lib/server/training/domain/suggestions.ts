@@ -1,7 +1,8 @@
+import type { MuscleGroup } from './muscles';
 import type { WorkloadRating } from '../types';
 
 type MuscleFeedbackSuggestionInput = {
-  muscle: string;
+  muscle: MuscleGroup;
   soreness: number | null;
   pump: number | null;
   workload: WorkloadRating | null;
@@ -27,5 +28,5 @@ export const buildMuscleFeedbackSuggestion = (input: MuscleFeedbackSuggestionInp
   return `${input.muscle}: feedback looks acceptable. Repeat the plan next exposure unless performance or pain says otherwise.`;
 };
 
-export const buildPainSuggestion = (input: { exerciseName: string; muscle: string; painAfter: number }) =>
+export const buildPainSuggestion = (input: { exerciseName: string; muscle: MuscleGroup; painAfter: number }) =>
   `Pain after ${input.exerciseName} was ${input.painAfter}/10. Hold or reduce loading next exposure and do not add volume for ${input.muscle}.`;

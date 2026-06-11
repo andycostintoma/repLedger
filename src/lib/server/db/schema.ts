@@ -1,5 +1,7 @@
 import { integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
+import { muscleGroups } from '$lib/server/training/domain/muscles';
+
 export const workoutTemplates = sqliteTable('workout_templates', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -9,7 +11,7 @@ export const workoutTemplates = sqliteTable('workout_templates', {
 export const exercises = sqliteTable('exercises', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
-  primaryMuscle: text('primary_muscle').default('unknown').notNull(),
+  primaryMuscle: text('primary_muscle', { enum: muscleGroups }).notNull(),
   equipment: text('equipment').default('unknown').notNull()
 });
 
@@ -60,7 +62,7 @@ export const exerciseMuscleCoefficients = sqliteTable(
     exerciseId: text('exercise_id')
       .notNull()
       .references(() => exercises.id, { onDelete: 'cascade' }),
-    muscle: text('muscle').notNull(),
+    muscle: text('muscle', { enum: muscleGroups }).notNull(),
     coefficient: real('coefficient').notNull()
   },
   (table) => [uniqueIndex('exercise_muscle_coefficients_unique_idx').on(table.exerciseId, table.muscle)]
@@ -125,7 +127,7 @@ export const muscleFeedback = sqliteTable(
     sessionId: text('session_id')
       .notNull()
       .references(() => sessions.id, { onDelete: 'cascade' }),
-    muscle: text('muscle').notNull(),
+    muscle: text('muscle', { enum: muscleGroups }).notNull(),
     soreness: integer('soreness'),
     pump: integer('pump'),
     workload: text('workload', { enum: ['too-low', 'good', 'too-high'] }),
@@ -142,7 +144,7 @@ export const nextSessionSuggestions = sqliteTable(
     sessionId: text('session_id')
       .notNull()
       .references(() => sessions.id, { onDelete: 'cascade' }),
-    muscle: text('muscle').notNull(),
+    muscle: text('muscle', { enum: muscleGroups }).notNull(),
     suggestion: text('suggestion').notNull(),
     status: text('status', { enum: ['proposed', 'accepted', 'ignored', 'edited'] }).notNull(),
     updatedAt: text('updated_at').notNull()

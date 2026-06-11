@@ -1,24 +1,19 @@
 import type { TrainingDatabase } from '$lib/server/db/client';
 import { mesocycles, templateMesocycles } from '$lib/server/db/schema';
+import { inArray } from 'drizzle-orm';
+
+const currentSplitTemplateId = 'current-upper-lower-six-day-rotation';
+const removedTemplateMesoIds = ['rp-style-six-day-hypertrophy', 'upper-lower-four-day-base'];
 
 const seedTemplateMesocycles = [
   {
-    id: 'rp-style-six-day-hypertrophy',
-    name: 'RP-style 6 day hypertrophy',
+    id: currentSplitTemplateId,
+    name: 'Current upper/lower rotation',
     category: 'Hypertrophy',
     frequency: '6 days/week',
     gender: 'All',
     weeks: 8,
     daysPerWeek: 6
-  },
-  {
-    id: 'upper-lower-four-day-base',
-    name: 'Upper/lower 4 day base',
-    category: 'Base',
-    frequency: '4 days/week',
-    gender: 'All',
-    weeks: 6,
-    daysPerWeek: 4
   }
 ];
 
@@ -31,7 +26,7 @@ const seedMesocycles = [
     daysPerWeek: 6,
     startedAt: '2026-06-09',
     completedAt: null,
-    templateMesoId: 'rp-style-six-day-hypertrophy'
+    templateMesoId: currentSplitTemplateId
   },
   {
     id: 'previous-training-block',
@@ -51,14 +46,22 @@ export const seedCatalog = (db: TrainingDatabase) => {
   seedTemplateMesocycles.forEach((template) => {
     db.insert(templateMesocycles)
       .values({ ...template, updatedAt: now })
-      .onConflictDoNothing()
+      .onConflictDoUpdate({
+        target: templateMesocycles.id,
+        set: { ...template, updatedAt: now }
+      })
       .run();
   });
 
   seedMesocycles.forEach((mesocycle) => {
     db.insert(mesocycles)
       .values({ ...mesocycle, updatedAt: now })
-      .onConflictDoNothing()
+      .onConflictDoUpdate({
+        target: mesocycles.id,
+        set: { ...mesocycle, updatedAt: now }
+      })
       .run();
   });
+
+  db.delete(templateMesocycles).where(inArray(templateMesocycles.id, removedTemplateMesoIds)).run();
 };

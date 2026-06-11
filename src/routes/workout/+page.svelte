@@ -2,6 +2,7 @@
   import { invalidateAll } from '$app/navigation';
   import { formatBodyweightLoad, isBodyweightLoadableEquipment, parseBodyweightLoad } from '$lib/training/equipment';
   import { muscleTone } from '$lib/training/presentation';
+  import type { MuscleGroup } from '$lib/server/training/domain/muscles';
   import type { PlannedExercise } from '$lib/server/training/types';
   import { finishWorkout, saveExerciseFeedback, saveLoggedSet, saveMuscleFeedback, saveSuggestion } from './workout.remote';
 
@@ -15,7 +16,7 @@
   const setIndexes = (count: number) => Array.from({ length: count }, (_, index) => index + 1);
 
   const groupExercises = (exercises: PlannedExercise[]) => {
-    const groups = new Map<string, PlannedExercise[]>();
+    const groups = new Map<MuscleGroup, PlannedExercise[]>();
 
     exercises.forEach((exercise) => {
       groups.set(exercise.primaryMuscle, [...(groups.get(exercise.primaryMuscle) ?? []), exercise]);
@@ -107,7 +108,7 @@
     await invalidateAll();
   };
 
-  const saveMuscle = async (event: SubmitEvent, muscle: string) => {
+  const saveMuscle = async (event: SubmitEvent, muscle: MuscleGroup) => {
     event.preventDefault();
 
     if (!(event.currentTarget instanceof HTMLFormElement)) return;
@@ -138,7 +139,7 @@
     await invalidateAll();
   };
 
-  const saveSuggestionForm = async (event: SubmitEvent, muscle: string) => {
+  const saveSuggestionForm = async (event: SubmitEvent, muscle: MuscleGroup) => {
     event.preventDefault();
 
     if (!(event.currentTarget instanceof HTMLFormElement)) return;
@@ -187,7 +188,7 @@
   <meta name="description" content="Internal workout tracker" />
 </svelte:head>
 
-<section class="px-4 pb-6 pt-4">
+<section class="w-full overflow-x-hidden px-4 pb-6 pt-4">
   <header class="sticky top-0 z-10 -mx-4 border-b border-white/10 bg-neutral-950/95 px-4 pb-3 pt-2 backdrop-blur">
     <div class="flex items-center justify-between gap-3">
       <a class="grid size-10 place-items-center rounded-full bg-neutral-900 text-lg ring-1 ring-white/10" href="/mesos" aria-label="Open current mesocycle">◷</a>
@@ -196,7 +197,7 @@
         <h1 class="text-xl font-black tracking-tight">{data.workout.name}</h1>
         <p class="text-xs text-neutral-400">{data.workout.date ? `${data.workout.date} · ` : ''}{data.workout.status}</p>
       </div>
-      <button class="grid size-10 place-items-center rounded-full bg-neutral-900 text-lg ring-1 ring-white/10" type="button" aria-label="Workout menu" onclick={() => (showWorkoutMenu = !showWorkoutMenu)}>⋯</button>
+      <button class="grid size-10 place-items-center rounded-full bg-neutral-900 text-lg ring-1 ring-white/10 transition hover:bg-neutral-800" type="button" aria-label="Workout menu" onclick={() => (showWorkoutMenu = !showWorkoutMenu)}>⋯</button>
     </div>
     {#if showWorkoutMenu}
       <div class="mt-3 grid gap-2 rounded-2xl bg-neutral-900 p-3 text-sm ring-1 ring-white/10">
@@ -209,13 +210,13 @@
       <p class="mt-3 rounded-2xl bg-red-500/10 p-3 text-sm text-red-200 ring-1 ring-red-400/30">{saveError}</p>
     {/if}
     {#if data.workout.status !== 'completed'}
-      <button class="mt-3 w-full rounded-2xl bg-emerald-300 px-4 py-3 text-sm font-black text-neutral-950 disabled:opacity-60" disabled={savingFeedback === 'finish-workout'} type="button" onclick={finishCurrentWorkout}>
+      <button class="mt-3 w-full rounded-2xl bg-emerald-300 px-4 py-3 text-sm font-black text-neutral-950 shadow-lg shadow-emerald-950/20 transition hover:bg-emerald-200 disabled:opacity-60" disabled={savingFeedback === 'finish-workout'} type="button" onclick={finishCurrentWorkout}>
         {savingFeedback === 'finish-workout' ? 'Finishing...' : 'Finish workout'}
       </button>
     {/if}
   </header>
 
-  <section class="mt-4 rounded-3xl bg-neutral-900 p-4 ring-1 ring-white/10">
+  <section class="mt-4 overflow-hidden rounded-3xl bg-neutral-900/90 p-4 shadow-xl shadow-black/20 ring-1 ring-white/10">
     <div class="flex items-center justify-between gap-3">
       <div>
         <p class="text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">Facts</p>
@@ -223,9 +224,9 @@
       </div>
       <span class="rounded-full bg-neutral-950 px-3 py-1 text-xs text-neutral-300">effective sets</span>
     </div>
-    <div class="mt-3 flex gap-2 overflow-x-auto pb-1">
+    <div class="scrollbar-none -mx-4 mt-3 flex snap-x gap-2 overflow-x-auto px-4 pb-1">
       {#each data.workout.volumeFacts as fact}
-        <div class="min-w-28 rounded-2xl bg-neutral-950 p-3 ring-1 ring-white/5">
+        <div class="w-28 shrink-0 snap-start rounded-2xl bg-neutral-950 p-3 ring-1 ring-white/5">
           <p class="text-xs uppercase tracking-wide text-neutral-500">{fact.muscle}</p>
           <p class="mt-2 text-lg font-black">{fact.sessionEffectiveSets}</p>
           <p class="text-xs text-neutral-400">week {fact.weekToDateEffectiveSets}</p>
@@ -234,52 +235,52 @@
     </div>
   </section>
 
-  <section class="mt-5 grid gap-6" aria-label="Workout exercises">
+  <section class="mt-5 grid min-w-0 gap-6" aria-label="Workout exercises">
     {#each groupExercises(data.workout.exercises) as group}
-      <section class="grid gap-3">
+      <section class="grid min-w-0 gap-3">
         <div class="flex items-center gap-2">
           <span class={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ring-1 ${muscleTone(group.muscle)}`}>{group.muscle}</span>
           <div class="h-px flex-1 bg-white/10"></div>
         </div>
 
         {#each group.exercises as exercise}
-          <article class="rounded-[1.6rem] bg-neutral-900 p-4 shadow-2xl shadow-black/25 ring-1 ring-white/10">
-            <div class="flex items-start justify-between gap-3">
-              <div>
+          <article class="min-w-0 rounded-[1.6rem] bg-neutral-900 p-4 shadow-2xl shadow-black/25 ring-1 ring-white/10">
+            <div class="flex min-w-0 items-start justify-between gap-3">
+              <div class="min-w-0">
                 <h2 class="text-lg font-black leading-tight">{exercise.name}</h2>
                 <p class="mt-1 text-sm text-neutral-400">{exercise.equipment} · {exercise.method} · {exercise.programmedSets} sets</p>
               </div>
-              <span class="rounded-full bg-neutral-950 px-3 py-1 text-xs font-bold text-neutral-300 ring-1 ring-white/10">{exercise.targetRepRange}</span>
+              <span class="shrink-0 rounded-full bg-neutral-950 px-3 py-1 text-xs font-bold text-neutral-300 ring-1 ring-white/10">{exercise.targetRepRange}</span>
             </div>
 
             <div class="mt-4 rounded-2xl bg-cyan-300/10 p-3 text-sm text-cyan-100 ring-1 ring-cyan-200/20">Previous: {exercise.previousPerformance}</div>
 
-            <div class="mt-3 grid gap-2">
+            <div class="mt-3 grid min-w-0 gap-2">
               {#each setIndexes(exercise.programmedSets) as setIndex}
                 {@const savedSet = exercise.loggedSets.find((set) => set.setIndex === setIndex)}
                 {@const saveKey = `${exercise.id}-${setIndex}`}
-                <form class={`grid items-end gap-2 rounded-2xl bg-neutral-950 p-2 ring-1 ring-white/5 ${isBodyweightLoadableEquipment(exercise.equipment) ? 'grid-cols-[1.5rem_2.5rem_1fr_1fr_4.5rem_3rem]' : 'grid-cols-[1.5rem_2.5rem_1fr_4.5rem_3rem]'}`} onsubmit={(event) => saveSet(event, exercise, setIndex)}>
+                <form class={`grid min-w-0 items-end gap-2 rounded-2xl bg-neutral-950 p-2 ring-1 ring-white/5 ${isBodyweightLoadableEquipment(exercise.equipment) ? 'grid-cols-[1rem_1.5rem_minmax(0,1fr)_minmax(0,1fr)_4rem_2.75rem]' : 'grid-cols-[1rem_1.5rem_minmax(0,1fr)_4rem_2.75rem]'}`} onsubmit={(event) => saveSet(event, exercise, setIndex)}>
                   <span class="pb-3 text-center text-lg leading-none text-neutral-600">⋮</span>
                   <p class="pb-3 text-sm font-black text-neutral-300">{setIndex}</p>
                   {#if isBodyweightLoadableEquipment(exercise.equipment)}
                     {@const parsedLoad = parseBodyweightLoad(savedSet?.loadText ?? '')}
-                    <label class="grid gap-1 text-[0.65rem] font-bold uppercase tracking-wide text-neutral-500">
+                    <label class="grid min-w-0 gap-1 text-[0.65rem] font-bold uppercase tracking-wide text-neutral-500">
                       Bodyweight
-                      <input class="rounded-xl border border-white/10 bg-neutral-900 px-2 py-3 text-base text-neutral-100 outline-none focus:border-cyan-300" name="bodyweight" type="number" min="0" step="0.1" value={parsedLoad?.bodyweight ?? ''} placeholder="kg" required />
+                      <input class="min-w-0 rounded-xl border border-white/10 bg-neutral-900 px-2 py-3 text-base text-neutral-100 outline-none focus:border-cyan-300" name="bodyweight" type="number" min="0" step="0.1" value={parsedLoad?.bodyweight ?? ''} placeholder="kg" required />
                     </label>
-                    <label class="grid gap-1 text-[0.65rem] font-bold uppercase tracking-wide text-neutral-500">
+                    <label class="grid min-w-0 gap-1 text-[0.65rem] font-bold uppercase tracking-wide text-neutral-500">
                       Added
-                      <input class="rounded-xl border border-white/10 bg-neutral-900 px-2 py-3 text-base text-neutral-100 outline-none focus:border-cyan-300" name="addedWeight" type="number" min="0" step="0.1" value={parsedLoad?.addedWeight ?? '0'} placeholder="0" />
+                      <input class="min-w-0 rounded-xl border border-white/10 bg-neutral-900 px-2 py-3 text-base text-neutral-100 outline-none focus:border-cyan-300" name="addedWeight" type="number" min="0" step="0.1" value={parsedLoad?.addedWeight ?? '0'} placeholder="0" />
                     </label>
                   {:else}
-                    <label class="grid gap-1 text-[0.65rem] font-bold uppercase tracking-wide text-neutral-500">
+                    <label class="grid min-w-0 gap-1 text-[0.65rem] font-bold uppercase tracking-wide text-neutral-500">
                       Weight
-                      <input class="rounded-xl border border-white/10 bg-neutral-900 px-2 py-3 text-base text-neutral-100 outline-none focus:border-cyan-300" name="loadText" value={savedSet?.loadText ?? ''} placeholder="kg/setup" required />
+                      <input class="min-w-0 rounded-xl border border-white/10 bg-neutral-900 px-2 py-3 text-base text-neutral-100 outline-none focus:border-cyan-300" name="loadText" value={savedSet?.loadText ?? ''} placeholder="kg/setup" required />
                     </label>
                   {/if}
-                  <label class="grid gap-1 text-[0.65rem] font-bold uppercase tracking-wide text-neutral-500">
+                  <label class="grid min-w-0 gap-1 text-[0.65rem] font-bold uppercase tracking-wide text-neutral-500">
                     Reps
-                    <input class="rounded-xl border border-white/10 bg-neutral-900 px-2 py-3 text-base text-neutral-100 outline-none focus:border-cyan-300" name="reps" type="number" min="0" max="100" value={savedSet?.reps ?? ''} required />
+                    <input class="min-w-0 rounded-xl border border-white/10 bg-neutral-900 px-2 py-3 text-base text-neutral-100 outline-none focus:border-cyan-300" name="reps" type="number" min="0" max="100" value={savedSet?.reps ?? ''} required />
                   </label>
                   <input name="notes" type="hidden" value={savedSet?.notes ?? ''} />
                   <input name="pain" type="hidden" value={savedSet?.pain ?? ''} />

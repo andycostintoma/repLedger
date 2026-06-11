@@ -1,5 +1,7 @@
 import type { EquipmentType } from '$lib/training/equipment';
 
+import type { MuscleGroup } from './domain/muscles';
+
 export type TrainingMethod = 'regular' | 'myo-match';
 
 export type TabKey = 'workout' | 'mesos' | 'templates' | 'exercises';
@@ -15,7 +17,7 @@ export type PlannedExercise = {
   programmedSets: number;
   targetRepRange: string;
   previousPerformance: string;
-  primaryMuscle: string;
+  primaryMuscle: MuscleGroup;
   loggedSets: LoggedSet[];
   feedback: ExerciseFeedback | null;
 };
@@ -34,7 +36,7 @@ export type ExerciseFeedback = {
 };
 
 export type MuscleFeedback = {
-  muscle: string;
+  muscle: MuscleGroup;
   soreness: number | null;
   pump: number | null;
   workload: WorkloadRating | null;
@@ -42,13 +44,13 @@ export type MuscleFeedback = {
 };
 
 export type MuscleVolumeFact = {
-  muscle: string;
+  muscle: MuscleGroup;
   sessionEffectiveSets: number;
   weekToDateEffectiveSets: number;
 };
 
 export type NextSessionSuggestion = {
-  muscle: string;
+  muscle: MuscleGroup;
   suggestion: string;
   status: SuggestionStatus;
 };
@@ -64,7 +66,7 @@ export type TodayWorkout = {
   date: string | null;
   status: 'planned' | 'in-progress' | 'completed';
   exercises: PlannedExercise[];
-  muscles: string[];
+  muscles: MuscleGroup[];
   volumeFacts: MuscleVolumeFact[];
   muscleFeedback: MuscleFeedback[];
   suggestions: NextSessionSuggestion[];
@@ -100,7 +102,7 @@ export type MesocycleExerciseSummary = {
   id: string;
   name: string;
   equipment: EquipmentType;
-  primaryMuscle: string;
+  primaryMuscle: MuscleGroup;
   method: TrainingMethod;
   targetRepRange: string;
   sets: LoggedSet[];
@@ -119,9 +121,17 @@ export type TemplateMesocycleSummary = {
 export type ExerciseSummary = {
   id: string;
   name: string;
-  primaryMuscle: string;
+  primaryMuscle: MuscleGroup;
+  primaryMuscles: MuscleGroup[];
+  secondaryMuscles: MuscleGroup[];
+  muscleCoefficients: ExerciseMuscleCoefficient[];
   equipment: EquipmentType;
   history: ExerciseHistoryEntry[];
+};
+
+export type ExerciseMuscleCoefficient = {
+  muscle: MuscleGroup;
+  coefficient: number;
 };
 
 export type ExerciseHistoryEntry = {
@@ -136,5 +146,6 @@ export type ExerciseHistoryEntry = {
 export type TrainingCatalog = {
   mesocycles: MesocycleSummary[];
   templateMesocycles: TemplateMesocycleSummary[];
+  muscleGroups: MuscleGroup[];
   exercises: ExerciseSummary[];
 };
