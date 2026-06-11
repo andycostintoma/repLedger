@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1781177591685,
+      "tag": "0000_glamorous_smiling_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1781180485768,
+      "tag": "0001_brave_sauron",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1781182253517,
+      "tag": "0002_opposite_albert_cleary",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1781183936928,
+      "tag": "0003_kind_nekra",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1781186224067,
+      "tag": "0004_nosy_glorian",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1781187837749,
+      "tag": "0005_silky_genesis",
+      "breakpoints": true
+    }
+  ]
+}

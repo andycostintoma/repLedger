@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Workout Tracker icon">
+  <rect width="512" height="512" rx="112" fill="#0f172a" />
+  <path d="M128 280h256v56H128z" fill="#67e8f9" />
+  <path d="M92 232h48v152H92zm280 0h48v152h-48z" fill="#22d3ee" />
+  <path d="M52 260h52v96H52zm356 0h52v96h-52z" fill="#e5e7eb" />
+</svg>
