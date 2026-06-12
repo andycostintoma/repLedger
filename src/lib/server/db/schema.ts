@@ -12,6 +12,7 @@ export const exercises = sqliteTable('exercises', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   primaryMuscle: text('primary_muscle', { enum: muscleGroups }).notNull(),
+  familyId: text('family_id'),
   equipment: text('equipment').default('unknown').notNull()
 });
 

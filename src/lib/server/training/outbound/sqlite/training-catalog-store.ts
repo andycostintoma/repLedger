@@ -6,6 +6,8 @@ import { exerciseMuscleCoefficients, exercises, loggedSets, mesocycles, sessions
 import { toEquipmentType, type EquipmentType } from '$lib/training/equipment';
 import { normalizedExerciseName } from '$lib/training/exercise-normalization';
 
+import { exerciseFamilies, getExerciseFamilyCoefficients, isExerciseFamilyId, suggestExerciseFamilyId } from '../../domain/exercise-families';
+import { isMuscleCoefficientValue, type MuscleCoefficientValue } from '../../domain/coefficients';
 import { isMuscleGroup, muscleGroups, type MuscleGroup } from '../../domain/muscles';
 import { seedCatalog } from '../../seeds/catalog';
 import type { ExerciseHistoryEntry, ExerciseMuscleCoefficient, LoggedSet, MesoStatus, MesocycleExerciseSummary, MesocycleSessionSummary, TrainingCatalog } from '../../types';
@@ -34,14 +36,23 @@ export type CreateTemplateMesocycleInput = {
 
 export type CreateExerciseInput = {
   name: string;
-  primaryMuscle: MuscleGroup;
+  primaryMuscle?: MuscleGroup;
   equipment: EquipmentType;
+  familyId?: string | null;
+  muscleCoefficients?: ExerciseMuscleCoefficientInput[];
 };
 
 export type UpdateExerciseMusclesInput = {
   exerciseId: string;
-  primaryMuscles: MuscleGroup[];
-  secondaryMuscles: MuscleGroup[];
+  familyId?: string | null;
+  muscleCoefficients?: ExerciseMuscleCoefficientInput[];
+  primaryMuscles?: MuscleGroup[];
+  secondaryMuscles?: MuscleGroup[];
+};
+
+export type ExerciseMuscleCoefficientInput = {
+  muscle: MuscleGroup;
+  coefficient: MuscleCoefficientValue;
 };
 
 export type UpdateExerciseNameInput = {
@@ -94,6 +105,15 @@ export const getTrainingCatalog = async (): Promise<Result<TrainingCatalog, Trai
         daysPerWeek: template.daysPerWeek
       })),
       muscleGroups: [...muscleGroups],
+      exerciseFamilies: exerciseFamilies.map((family) => ({
+        id: family.id,
+        name: family.name,
+        category: family.category,
+        notes: family.notes,
+        coefficients: Object.entries(family.coefficients)
+          .map(([muscle, coefficient]) => ({ muscle: muscle as MuscleGroup, coefficient }))
+          .sort((a, b) => muscleGroups.indexOf(a.muscle) - muscleGroups.indexOf(b.muscle))
+      })),
       exercises: savedExercises.map((exercise) => {
         const muscleCoefficients = buildExerciseCoefficients(exercise, savedExerciseCoefficients);
 
@@ -104,6 +124,7 @@ export const getTrainingCatalog = async (): Promise<Result<TrainingCatalog, Trai
           primaryMuscles: muscleCoefficients.filter((coefficient) => coefficient.coefficient === 1).map((coefficient) => coefficient.muscle),
           secondaryMuscles: muscleCoefficients.filter((coefficient) => coefficient.coefficient > 0 && coefficient.coefficient < 1).map((coefficient) => coefficient.muscle),
           muscleCoefficients,
+          familyId: exercise.familyId,
           equipment: toEquipmentType(exercise.equipment),
           history: buildExerciseHistory({
             exercise,
@@ -176,28 +197,37 @@ export const createTemplateMesocycle = async (input: CreateTemplateMesocycleInpu
 
 export const createExercise = async (input: CreateExerciseInput): Promise<Result<void, TrainingCatalogError>> => {
   try {
-    if (!isMuscleGroup(input.primaryMuscle)) {
-      return err({ kind: 'training-catalog-error', message: `Unknown muscle group: ${input.primaryMuscle}` });
+    const familyId = normalizeFamilyId(input.familyId) ?? suggestExerciseFamilyId(input.name, input.equipment);
+    const coefficientRows = buildCoefficientRows({
+      exerciseId: '',
+      familyId,
+      explicitCoefficients: input.muscleCoefficients,
+      primaryMuscles: input.primaryMuscle ? [input.primaryMuscle] : undefined,
+      secondaryMuscles: []
+    });
+    if (coefficientRows.isErr()) return err(coefficientRows.error);
+
+    const primaryMuscle = coefficientRows.value.find((coefficient) => coefficient.coefficient === 1)?.muscle ?? input.primaryMuscle;
+    if (!primaryMuscle || !isMuscleGroup(primaryMuscle)) {
+      return err({ kind: 'training-catalog-error', message: 'Choose at least one muscle with coefficient 1.0.' });
     }
 
     const db = await getDb();
     const exerciseId = slugWithTime(input.name);
+    const rows = coefficientRows.value.map((row) => ({ ...row, exerciseId }));
 
     db.insert(exercises)
         .values({
           id: exerciseId,
           name: input.name,
-          primaryMuscle: input.primaryMuscle,
+          primaryMuscle,
+          familyId,
           equipment: toEquipmentType(input.equipment)
         })
       .run();
 
     db.insert(exerciseMuscleCoefficients)
-      .values({
-        exerciseId,
-        muscle: input.primaryMuscle,
-        coefficient: 1
-      })
+      .values(rows)
       .onConflictDoNothing()
       .run();
 
@@ -209,16 +239,19 @@ export const createExercise = async (input: CreateExerciseInput): Promise<Result
 
 export const updateExerciseMuscles = async (input: UpdateExerciseMusclesInput): Promise<Result<void, TrainingCatalogError>> => {
   try {
-    const primaryMuscles = uniqueMuscles(input.primaryMuscles);
-    const secondaryMuscles = uniqueMuscles(input.secondaryMuscles).filter((muscle) => !primaryMuscles.includes(muscle));
+    const familyId = normalizeFamilyId(input.familyId);
+    const coefficientRows = buildCoefficientRows({
+      exerciseId: input.exerciseId,
+      familyId,
+      explicitCoefficients: input.muscleCoefficients,
+      primaryMuscles: input.primaryMuscles,
+      secondaryMuscles: input.secondaryMuscles
+    });
+    if (coefficientRows.isErr()) return err(coefficientRows.error);
 
-    if (primaryMuscles.length === 0) {
-      return err({ kind: 'training-catalog-error', message: 'Choose at least one primary muscle group.' });
-    }
-
-    const invalidMuscle = [...primaryMuscles, ...secondaryMuscles].find((muscle) => !isMuscleGroup(muscle));
-    if (invalidMuscle) {
-      return err({ kind: 'training-catalog-error', message: `Unknown muscle group: ${invalidMuscle}` });
+    const primaryMuscle = coefficientRows.value.find((coefficient) => coefficient.coefficient === 1)?.muscle;
+    if (!primaryMuscle) {
+      return err({ kind: 'training-catalog-error', message: 'Choose at least one muscle with coefficient 1.0.' });
     }
 
     const db = await getDb();
@@ -229,18 +262,12 @@ export const updateExerciseMuscles = async (input: UpdateExerciseMusclesInput): 
     }
 
     db.update(exercises)
-      .set({ primaryMuscle: primaryMuscles[0] })
+      .set({ primaryMuscle, familyId })
       .where(eq(exercises.id, input.exerciseId))
       .run();
 
     db.delete(exerciseMuscleCoefficients).where(eq(exerciseMuscleCoefficients.exerciseId, input.exerciseId)).run();
-
-    const coefficientRows = [
-      ...primaryMuscles.map((muscle) => ({ exerciseId: input.exerciseId, muscle, coefficient: 1 })),
-      ...secondaryMuscles.map((muscle) => ({ exerciseId: input.exerciseId, muscle, coefficient: 0.5 }))
-    ];
-
-    db.insert(exerciseMuscleCoefficients).values(coefficientRows).run();
+    db.insert(exerciseMuscleCoefficients).values(coefficientRows.value).run();
 
     return ok(undefined);
   } catch (error) {
@@ -290,6 +317,63 @@ const buildExerciseCoefficients = (
 };
 
 const uniqueMuscles = (muscles: MuscleGroup[]) => [...new Set(muscles)];
+
+const normalizeFamilyId = (familyId: string | null | undefined) => {
+  const trimmed = familyId?.trim();
+  if (!trimmed) return null;
+  return isExerciseFamilyId(trimmed) ? trimmed : null;
+};
+
+const buildCoefficientRows = (input: {
+  exerciseId: string;
+  familyId: string | null;
+  explicitCoefficients?: ExerciseMuscleCoefficientInput[];
+  primaryMuscles?: MuscleGroup[];
+  secondaryMuscles?: MuscleGroup[];
+}): Result<Array<{ exerciseId: string; muscle: MuscleGroup; coefficient: MuscleCoefficientValue }>, TrainingCatalogError> => {
+  const coefficients = new Map<MuscleGroup, MuscleCoefficientValue>();
+
+  for (const [muscle, coefficient] of Object.entries(getExerciseFamilyCoefficients(input.familyId))) {
+    coefficients.set(muscle as MuscleGroup, coefficient);
+  }
+
+  if (input.explicitCoefficients) {
+    coefficients.clear();
+    for (const row of input.explicitCoefficients) {
+      if (!isMuscleGroup(row.muscle)) {
+        return err({ kind: 'training-catalog-error', message: `Unknown muscle group: ${row.muscle}` });
+      }
+      if (!isMuscleCoefficientValue(row.coefficient)) {
+        return err({ kind: 'training-catalog-error', message: `Invalid coefficient for ${row.muscle}.` });
+      }
+      coefficients.set(row.muscle, row.coefficient);
+    }
+  } else if (input.primaryMuscles || input.secondaryMuscles) {
+    coefficients.clear();
+    const primaryMuscles = uniqueMuscles(input.primaryMuscles ?? []);
+    const secondaryMuscles = uniqueMuscles(input.secondaryMuscles ?? []).filter((muscle) => !primaryMuscles.includes(muscle));
+
+    for (const muscle of [...primaryMuscles, ...secondaryMuscles]) {
+      if (!isMuscleGroup(muscle)) {
+        return err({ kind: 'training-catalog-error', message: `Unknown muscle group: ${muscle}` });
+      }
+    }
+
+    for (const muscle of primaryMuscles) coefficients.set(muscle, 1);
+    for (const muscle of secondaryMuscles) coefficients.set(muscle, 0.5);
+  }
+
+  const rows = [...coefficients.entries()]
+    .filter(([, coefficient]) => coefficient > 0)
+    .sort((a, b) => muscleGroups.indexOf(a[0]) - muscleGroups.indexOf(b[0]))
+    .map(([muscle, coefficient]) => ({ exerciseId: input.exerciseId, muscle, coefficient }));
+
+  if (rows.length === 0) {
+    return err({ kind: 'training-catalog-error', message: 'Choose at least one muscle coefficient.' });
+  }
+
+  return ok(rows);
+};
 
 const slugWithTime = (value: string) => `${slugify(value)}-${Date.now().toString(36)}`;
 

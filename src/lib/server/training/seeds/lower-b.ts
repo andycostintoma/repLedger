@@ -4,6 +4,7 @@ import type { TrainingDatabase } from '$lib/server/db/client';
 import { exerciseMuscleCoefficients, exercises, sessions, workoutTemplateExercises, workoutTemplates } from '$lib/server/db/schema';
 import { toEquipmentType, type EquipmentType } from '$lib/training/equipment';
 
+import { suggestExerciseFamilyId } from '../domain/exercise-families';
 import type { MuscleGroup } from '../domain/muscles';
 import { getMusclesForExercises } from '../domain/volume';
 import type { TrainingMethod } from '../types';
@@ -31,20 +32,20 @@ export const lowerBPriorWeekVolume: Partial<Record<MuscleGroup, number>> = {
   gastrocnemius: 9,
   chest: 10,
   brachioradialis: 3,
-  'front delts': 5,
-  'glute max': 4.4,
-  'glute med/min': 4.5,
-  'hamstrings (except BF short head)': 2,
+  front_delts: 5,
+  glute_max: 4.4,
+  glute_med_min: 4.5,
+  hamstrings_biarticular: 2,
   lats: 10,
-  'quads (vasti)': 5.5,
-  'rear delts': 7.5,
-  'side delts': 9,
-  'triceps lateral/medial': 7.5,
-  'triceps long head': 5,
-  'upper back': 8.75,
-  'upper traps': 6.75,
-  'wrist extensors': 3,
-  'wrist flexors': 3
+  quads_vasti: 5.5,
+  rear_delts: 7.5,
+  side_delts: 9,
+  triceps_lateral_medial: 7.5,
+  triceps_long_head: 5,
+  upper_back: 8.75,
+  upper_traps: 6.75,
+  wrist_extensors: 3,
+  wrist_flexors: 3
 };
 
 export const lowerBExercises: LowerBSeedExercise[] = [
@@ -55,8 +56,8 @@ export const lowerBExercises: LowerBSeedExercise[] = [
     equipment: 'Barbell',
     method: 'myo-match',
     programmedSets: 3,
-    primaryMuscle: 'wrist flexors',
-    coefficients: { 'wrist flexors': 1 }
+    primaryMuscle: 'wrist_flexors',
+    coefficients: { wrist_flexors: 1 }
   },
   {
     exerciseId: 'belt-squat',
@@ -65,8 +66,8 @@ export const lowerBExercises: LowerBSeedExercise[] = [
     equipment: 'Machine',
     method: 'myo-match',
     programmedSets: 2,
-    primaryMuscle: 'quads (vasti)',
-    coefficients: { 'quads (vasti)': 1, 'glute max': 0.75 }
+    primaryMuscle: 'quads_vasti',
+    coefficients: { quads_vasti: 1, glute_max: 0.5, adductors: 0.5 }
   },
   {
     exerciseId: 'lying-leg-curl',
@@ -75,8 +76,8 @@ export const lowerBExercises: LowerBSeedExercise[] = [
     equipment: 'Machine',
     method: 'myo-match',
     programmedSets: 3,
-    primaryMuscle: 'hamstrings (except BF short head)',
-    coefficients: { 'hamstrings (except BF short head)': 1 }
+    primaryMuscle: 'hamstrings_biarticular',
+    coefficients: { biceps_femoris_short_head: 1, hamstrings_biarticular: 1 }
   },
   {
     exerciseId: 'machine-hip-thrust',
@@ -85,8 +86,8 @@ export const lowerBExercises: LowerBSeedExercise[] = [
     equipment: 'Machine',
     method: 'myo-match',
     programmedSets: 2,
-    primaryMuscle: 'glute max',
-    coefficients: { 'glute max': 1 }
+    primaryMuscle: 'glute_max',
+    coefficients: { glute_max: 1 }
   },
   {
     exerciseId: 'deficit-trap-bar-squats-no-touch',
@@ -95,8 +96,8 @@ export const lowerBExercises: LowerBSeedExercise[] = [
     equipment: 'Barbell',
     method: 'regular',
     programmedSets: 1,
-    primaryMuscle: 'quads (vasti)',
-    coefficients: { 'quads (vasti)': 1, 'glute max': 0.75 }
+    primaryMuscle: 'quads_vasti',
+    coefficients: { quads_vasti: 1, glute_max: 0.5, adductors: 0.5 }
   },
   {
     exerciseId: 'trap-bar-shrugs',
@@ -105,8 +106,8 @@ export const lowerBExercises: LowerBSeedExercise[] = [
     equipment: 'Barbell',
     method: 'myo-match',
     programmedSets: 3,
-    primaryMuscle: 'upper traps',
-    coefficients: { 'upper traps': 1 }
+    primaryMuscle: 'upper_traps',
+    coefficients: { upper_traps: 1 }
   },
   {
     exerciseId: 'reverse-crunches',
@@ -116,7 +117,7 @@ export const lowerBExercises: LowerBSeedExercise[] = [
     method: 'myo-match',
     programmedSets: 2,
     primaryMuscle: 'abs',
-    coefficients: { abs: 1 }
+    coefficients: { 'abs': 1 }
   },
   {
     exerciseId: 'machine-crunch',
@@ -126,7 +127,7 @@ export const lowerBExercises: LowerBSeedExercise[] = [
     method: 'myo-match',
     programmedSets: 2,
     primaryMuscle: 'abs',
-    coefficients: { abs: 1 }
+    coefficients: { 'abs': 1 }
   }
 ];
 
@@ -144,11 +145,14 @@ export const seedLowerB = (db: TrainingDatabase) => {
     .run();
 
   lowerBExercises.forEach((exercise, index) => {
+    const familyId = suggestExerciseFamilyId(exercise.name, exercise.equipment);
+
     db.insert(exercises)
       .values({
         id: exercise.exerciseId,
         name: exercise.name,
         primaryMuscle: exercise.primaryMuscle,
+        familyId,
         equipment: toEquipmentType(exercise.equipment)
       })
       .onConflictDoUpdate({
@@ -156,6 +160,7 @@ export const seedLowerB = (db: TrainingDatabase) => {
         set: {
           name: exercise.name,
           primaryMuscle: exercise.primaryMuscle,
+          familyId,
           equipment: toEquipmentType(exercise.equipment)
         }
       })

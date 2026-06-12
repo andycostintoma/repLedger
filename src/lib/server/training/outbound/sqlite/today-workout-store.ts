@@ -1,9 +1,10 @@
-import { asc, eq } from 'drizzle-orm';
+import { asc, eq, inArray } from 'drizzle-orm';
 import { err, ok, type Result } from 'neverthrow';
 
 import { getDb, type TrainingDatabase } from '$lib/server/db/client';
 import {
   exerciseFeedback,
+  exerciseMuscleCoefficients,
   exercises,
   loggedSets,
   muscleFeedback,
@@ -15,8 +16,8 @@ import { toEquipmentType } from '$lib/training/equipment';
 
 import { buildMuscleFeedbackSuggestion, buildPainSuggestion } from '../../domain/suggestions';
 import type { MuscleGroup } from '../../domain/muscles';
-import { buildMuscleVolumeFacts } from '../../domain/volume';
-import { getLowerBMuscles, lowerBExercises, lowerBPriorWeekVolume, lowerBSessionId, lowerBTemplateId, seedLowerB } from '../../seeds/lower-b';
+import { buildMuscleVolumeFacts, getMusclesForExercises } from '../../domain/volume';
+import { lowerBExercises, lowerBPriorWeekVolume, lowerBSessionId, lowerBTemplateId, seedLowerB } from '../../seeds/lower-b';
 import type { SuggestionStatus, TodayWorkout, WorkloadRating } from '../../types';
 
 type TrainingStoreError = {
@@ -78,6 +79,7 @@ export const getTodayWorkout = async (): Promise<Result<TodayWorkout, TrainingSt
         templateExerciseId: workoutTemplateExercises.id,
         exerciseId: exercises.id,
         name: exercises.name,
+        primaryMuscle: exercises.primaryMuscle,
         equipment: exercises.equipment,
         method: workoutTemplateExercises.method,
         programmedSets: workoutTemplateExercises.programmedSets,
@@ -89,13 +91,23 @@ export const getTodayWorkout = async (): Promise<Result<TodayWorkout, TrainingSt
       .orderBy(asc(workoutTemplateExercises.position))
       .all();
 
+    const coefficientsByExerciseId = loadExerciseCoefficientMap(
+      db,
+      plannedExercises.map((exercise) => exercise.exerciseId)
+    );
+    const volumeExercises = plannedExercises.map((exercise) => ({
+      templateExerciseId: exercise.templateExerciseId,
+      method: exercise.method,
+      coefficients: coefficientsByExerciseId.get(exercise.exerciseId) ?? { [exercise.primaryMuscle]: 1 }
+    }));
+
     const savedSets = db.select().from(loggedSets).where(eq(loggedSets.sessionId, lowerBSessionId)).all();
     const savedExerciseFeedback = db.select().from(exerciseFeedback).where(eq(exerciseFeedback.sessionId, lowerBSessionId)).all();
     const savedMuscleFeedback = db.select().from(muscleFeedback).where(eq(muscleFeedback.sessionId, lowerBSessionId)).all();
     const savedSuggestions = db.select().from(nextSessionSuggestions).where(eq(nextSessionSuggestions.sessionId, lowerBSessionId)).all();
     const savedSession = db.select().from(sessions).where(eq(sessions.id, lowerBSessionId)).get();
-    const muscles = getLowerBMuscles();
-    const volumeFacts = buildMuscleVolumeFacts({ exercises: lowerBExercises, savedSets, priorWeekVolume: lowerBPriorWeekVolume });
+    const muscles = getMusclesForExercises(volumeExercises);
+    const volumeFacts = buildMuscleVolumeFacts({ exercises: volumeExercises, savedSets, priorWeekVolume: lowerBPriorWeekVolume });
     const status = savedSession?.status === 'completed' ? 'completed' : savedSets.length > 0 ? 'in-progress' : 'planned';
 
     return ok({
@@ -120,7 +132,7 @@ export const getTodayWorkout = async (): Promise<Result<TodayWorkout, TrainingSt
           programmedSets: exercise.programmedSets,
           targetRepRange: exercise.targetRepRange,
           previousPerformance: getPreviousPerformance(db, exercise.exerciseId),
-          primaryMuscle: seedExercise.primaryMuscle,
+          primaryMuscle: exercise.primaryMuscle,
           loggedSets: savedSets
             .filter((set) => set.templateExerciseId === exercise.templateExerciseId)
             .sort((a, b) => a.setIndex - b.setIndex)
@@ -343,6 +355,32 @@ const getPreviousPerformance = (db: TrainingDatabase, exerciseId: string) => {
   const reps = lastSets.map((set) => set.reps).join(', ');
 
   return `${lastDate}: ${load} x ${reps}`;
+};
+
+const loadExerciseCoefficientMap = (db: TrainingDatabase, exerciseIds: string[]) => {
+  const coefficientsByExerciseId = new Map<string, Partial<Record<MuscleGroup, number>>>();
+
+  if (exerciseIds.length === 0) {
+    return coefficientsByExerciseId;
+  }
+
+  const coefficientRows = db
+    .select({
+      exerciseId: exerciseMuscleCoefficients.exerciseId,
+      muscle: exerciseMuscleCoefficients.muscle,
+      coefficient: exerciseMuscleCoefficients.coefficient
+    })
+    .from(exerciseMuscleCoefficients)
+    .where(inArray(exerciseMuscleCoefficients.exerciseId, exerciseIds))
+    .all();
+
+  coefficientRows.forEach((row) => {
+    const coefficients = coefficientsByExerciseId.get(row.exerciseId) ?? {};
+    coefficients[row.muscle] = row.coefficient;
+    coefficientsByExerciseId.set(row.exerciseId, coefficients);
+  });
+
+  return coefficientsByExerciseId;
 };
 
 const localDateString = () => {

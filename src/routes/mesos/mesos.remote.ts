@@ -1,4 +1,4 @@
-import { command } from '$app/server';
+ import { command } from '$app/server';
 import { training } from '$lib/server/training/module';
 import { z } from 'zod';
 

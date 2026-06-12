@@ -45,7 +45,11 @@ export type MuscleFeedback = {
 
 export type MuscleVolumeFact = {
   muscle: MuscleGroup;
+  sessionDirectSets: number;
+  sessionIndirectSets: number;
   sessionEffectiveSets: number;
+  weekToDateDirectSets: number;
+  weekToDateIndirectSets: number;
   weekToDateEffectiveSets: number;
 };
 
@@ -125,6 +129,7 @@ export type ExerciseSummary = {
   primaryMuscles: MuscleGroup[];
   secondaryMuscles: MuscleGroup[];
   muscleCoefficients: ExerciseMuscleCoefficient[];
+  familyId: string | null;
   equipment: EquipmentType;
   history: ExerciseHistoryEntry[];
 };
@@ -147,5 +152,12 @@ export type TrainingCatalog = {
   mesocycles: MesocycleSummary[];
   templateMesocycles: TemplateMesocycleSummary[];
   muscleGroups: MuscleGroup[];
+  exerciseFamilies: Array<{
+    id: string;
+    name: string;
+    category: string;
+    coefficients: ExerciseMuscleCoefficient[];
+    notes?: string;
+  }>;
   exercises: ExerciseSummary[];
 };

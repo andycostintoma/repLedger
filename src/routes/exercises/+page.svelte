@@ -4,6 +4,7 @@
   import { muscleTone } from '$lib/training/presentation';
   import { addExercise, saveExerciseMuscles, saveExerciseName } from './exercises.remote';
 
+  import type { MuscleCoefficientValue } from '$lib/server/training/domain/coefficients';
   import type { MuscleGroup } from '$lib/server/training/domain/muscles';
 
   let { data } = $props();
@@ -33,6 +34,16 @@
 
   const exerciseMuscleOptions = () => ['all', ...data.catalog.muscleGroups];
 
+  const familyName = (familyId: string | null) => data.catalog.exerciseFamilies.find((family) => family.id === familyId)?.name ?? 'None';
+
+  const coefficientFor = (coefficients: Array<{ muscle: MuscleGroup; coefficient: number }>, muscle: MuscleGroup) =>
+    coefficients.find((coefficient) => coefficient.muscle === muscle)?.coefficient ?? 0;
+
+  const coefficientRowsFromForm = (formData: FormData) =>
+    data.catalog.muscleGroups
+      .map((muscle) => ({ muscle, coefficient: Number(formData.get(`coefficient:${muscle}`) ?? 0) as MuscleCoefficientValue }))
+      .filter((row) => row.coefficient > 0);
+
   const resetExerciseFilters = () => {
     exerciseFilter = '';
     exerciseEquipmentFilter = 'all';
@@ -51,6 +62,7 @@
 
     const equipmentValue = String(formData.get('equipment') ?? '').trim();
     const primaryMuscleValue = String(formData.get('primaryMuscle') ?? '').trim();
+    const familyId = String(formData.get('familyId') ?? '').trim() || null;
 
     if (!isEquipmentType(equipmentValue)) {
       savingCatalog = null;
@@ -58,16 +70,17 @@
       return;
     }
 
-    if (!data.catalog.muscleGroups.includes(primaryMuscleValue as MuscleGroup)) {
+    if (!familyId && !data.catalog.muscleGroups.includes(primaryMuscleValue as MuscleGroup)) {
       savingCatalog = null;
-      saveError = 'Choose a valid muscle group.';
+      saveError = 'Choose a family default or a primary muscle group.';
       return;
     }
 
     const result = await addExercise({
       name: String(formData.get('name') ?? '').trim(),
-      primaryMuscle: primaryMuscleValue as MuscleGroup,
-      equipment: equipmentValue
+      primaryMuscle: primaryMuscleValue ? (primaryMuscleValue as MuscleGroup) : undefined,
+      equipment: equipmentValue,
+      familyId
     });
 
     savingCatalog = null;
@@ -82,9 +95,6 @@
     await invalidateAll();
   };
 
-  const formMuscles = (formData: FormData, field: string) =>
-    [...new Set(formData.getAll(field).map((value) => String(value).trim()))].filter((value): value is MuscleGroup => data.catalog.muscleGroups.includes(value as MuscleGroup));
-
   const saveExerciseMuscleGroups = async (exerciseId: string, event: SubmitEvent) => {
     event.preventDefault();
 
@@ -92,18 +102,18 @@
 
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const primaryMuscles = formMuscles(formData, 'primaryMuscles');
-    const secondaryMuscles = formMuscles(formData, 'secondaryMuscles');
+    const familyId = String(formData.get('familyId') ?? '').trim() || null;
+    const muscleCoefficients = coefficientRowsFromForm(formData);
 
-    if (primaryMuscles.length === 0) {
-      saveError = 'Choose at least one primary muscle group.';
+    if (!muscleCoefficients.some((row) => row.coefficient === 1)) {
+      saveError = 'Choose at least one muscle with coefficient 1.0.';
       return;
     }
 
     savingCatalog = 'exercise-muscles';
     saveError = null;
 
-    const result = await saveExerciseMuscles({ exerciseId, primaryMuscles, secondaryMuscles });
+    const result = await saveExerciseMuscles({ exerciseId, familyId, muscleCoefficients });
 
     savingCatalog = null;
 
@@ -211,33 +221,40 @@
               <span class="text-neutral-500">Equipment</span>
               <span class="font-black text-neutral-100">{exercise.equipment}</span>
             </div>
+            <div class="flex justify-between rounded-2xl bg-neutral-950 px-3 py-3 ring-1 ring-white/5">
+              <span class="text-neutral-500">Family default</span>
+              <span class="font-black text-neutral-100">{familyName(exercise.familyId)}</span>
+            </div>
           </div>
           {#if showEditMuscles}
             <form class="mt-4 grid gap-4 rounded-3xl bg-neutral-950 p-4 ring-1 ring-cyan-300/20" onsubmit={(event) => saveExerciseMuscleGroups(exercise.id, event)}>
               <div>
-                <p class="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">Primary / strong</p>
-                <div class="mt-3 grid grid-cols-2 gap-2">
-                  {#each data.catalog.muscleGroups as muscle}
-                    <label class="flex min-w-0 items-center gap-2 rounded-2xl bg-neutral-900 px-3 py-2 text-xs font-bold text-neutral-200 ring-1 ring-white/10">
-                      <input class="accent-cyan-300" type="checkbox" name="primaryMuscles" value={muscle} checked={exercise.primaryMuscles.includes(muscle)} />
-                      <span class="min-w-0 truncate">{muscle}</span>
-                    </label>
+                <p class="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">Family provenance</p>
+                <select class="mt-2 w-full rounded-2xl border border-white/10 bg-neutral-900 px-3 py-3 text-sm font-bold text-neutral-100 outline-none focus:border-cyan-300" name="familyId">
+                  <option value="">None / custom</option>
+                  {#each data.catalog.exerciseFamilies as family}
+                    <option value={family.id} selected={exercise.familyId === family.id}>{family.name}</option>
                   {/each}
-                </div>
+                </select>
+                <p class="mt-2 text-xs text-neutral-500">Changing this stores provenance. Coefficients below remain the concrete per-exercise snapshot.</p>
               </div>
               <div>
-                <p class="text-xs font-black uppercase tracking-[0.18em] text-emerald-300">Secondary · 0.5</p>
-                <p class="mt-1 text-xs text-neutral-500">If a muscle is checked as both primary and secondary, primary wins.</p>
+                <p class="text-xs font-black uppercase tracking-[0.18em] text-emerald-300">Muscle coefficients</p>
+                <p class="mt-1 text-xs text-neutral-500">Use 1.0 for direct/full credit, 0.5 for meaningful secondary credit, and 0 for no counted volume.</p>
                 <div class="mt-3 grid grid-cols-2 gap-2">
                   {#each data.catalog.muscleGroups as muscle}
-                    <label class="flex min-w-0 items-center gap-2 rounded-2xl bg-neutral-900 px-3 py-2 text-xs font-bold text-neutral-200 ring-1 ring-white/10">
-                      <input class="accent-emerald-300" type="checkbox" name="secondaryMuscles" value={muscle} checked={exercise.secondaryMuscles.includes(muscle)} />
+                    <label class="grid min-w-0 gap-1 rounded-2xl bg-neutral-900 px-3 py-2 text-xs font-bold text-neutral-200 ring-1 ring-white/10">
                       <span class="min-w-0 truncate">{muscle}</span>
+                      <select class="rounded-xl border border-white/10 bg-neutral-950 px-2 py-2 text-xs font-black text-neutral-100" name={`coefficient:${muscle}`}>
+                        <option value={0} selected={coefficientFor(exercise.muscleCoefficients, muscle) === 0}>0</option>
+                        <option value={0.5} selected={coefficientFor(exercise.muscleCoefficients, muscle) === 0.5}>0.5</option>
+                        <option value={1} selected={coefficientFor(exercise.muscleCoefficients, muscle) === 1}>1.0</option>
+                      </select>
                     </label>
                   {/each}
                 </div>
               </div>
-              <button class="rounded-2xl bg-cyan-300 px-4 py-3 font-black text-neutral-950 disabled:opacity-60" disabled={savingCatalog === 'exercise-muscles'} type="submit">{savingCatalog === 'exercise-muscles' ? 'Saving...' : 'Save muscle groups'}</button>
+              <button class="rounded-2xl bg-cyan-300 px-4 py-3 font-black text-neutral-950 disabled:opacity-60" disabled={savingCatalog === 'exercise-muscles'} type="submit">{savingCatalog === 'exercise-muscles' ? 'Saving...' : 'Save coefficients'}</button>
             </form>
           {/if}
         </article>
@@ -303,8 +320,15 @@
     {#if showAddExercise}
       <form class="mt-4 rounded-3xl bg-neutral-900 p-4 ring-1 ring-white/10" onsubmit={saveExerciseLibraryItem}>
         <input class="w-full rounded-2xl border border-white/10 bg-neutral-950 px-3 py-3 outline-none focus:border-cyan-300" name="name" placeholder="Exercise name" required />
+        <select class="mt-2 w-full rounded-2xl border border-white/10 bg-neutral-950 px-3 py-3 outline-none focus:border-cyan-300" name="familyId">
+          <option value="">Choose family default by name heuristic</option>
+          {#each data.catalog.exerciseFamilies as family}
+            <option value={family.id}>{family.name}</option>
+          {/each}
+        </select>
         <div class="mt-2 grid grid-cols-2 gap-2">
-          <select class="rounded-2xl border border-white/10 bg-neutral-950 px-3 py-3 outline-none focus:border-cyan-300" name="primaryMuscle" required>
+          <select class="rounded-2xl border border-white/10 bg-neutral-950 px-3 py-3 outline-none focus:border-cyan-300" name="primaryMuscle">
+            <option value="">Primary fallback</option>
             {#each data.catalog.muscleGroups as muscle}
               <option value={muscle}>{muscle}</option>
             {/each}

@@ -74,5 +74,5 @@ This is the SvelteKit training PWA for the Health area.
   - 4 programmed myo-match sets = 7.0
   - 5 programmed myo-match sets = 10.0
 - Regular sets count normally.
-- Count volume by actual muscle using coefficients seeded from `../wiki/protocols/mesocycle-week-1-working-plan.md`.
+- Count volume by actual muscle using the app-domain exercise families in `src/lib/server/training/domain/exercise-families.ts` as the source of truth.
 - Show session effective volume, week-to-date volume, previous performance, and feedback summaries as facts.
