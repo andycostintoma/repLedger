@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package training.v1;
+
+import "common/v1/options/enum_friendly_string.proto";
+import "common/v1/options/enum_string_val.proto";
+
+option go_package = "workout-tracker/backend/pb/training/v1;trainingv1";
+
+enum MuscleGroup {
+  MUSCLE_GROUP_UNKNOWN = 0
+  [(common.v1.options.string_val) = "",
+  (common.v1.options.friendly_string) = "Unknown"];
+  MUSCLE_GROUP_QUADS_VASTI = 1
+  [(common.v1.options.string_val) = "quads_vasti",
+  (common.v1.options.friendly_string) = "Quads vasti"];
+  MUSCLE_GROUP_RECTUS_FEMORIS = 2
+  [(common.v1.options.string_val) = "rectus_femoris",
+  (common.v1.options.friendly_string) = "Rectus femoris"];
+  MUSCLE_GROUP_ADDUCTORS = 3
+  [(common.v1.options.string_val) = "adductors",
+  (common.v1.options.friendly_string) = "Adductors"];
+  MUSCLE_GROUP_HAMSTRINGS_BIARTICULAR = 4
+  [(common.v1.options.string_val) = "hamstrings_biarticular",
+  (common.v1.options.friendly_string) = "Hamstrings biarticular"];
+  MUSCLE_GROUP_BICEPS_FEMORIS_SHORT_HEAD = 5
+  [(common.v1.options.string_val) = "biceps_femoris_short_head",
+  (common.v1.options.friendly_string) = "Biceps femoris short head"];
+  MUSCLE_GROUP_GLUTE_MAX = 6
+  [(common.v1.options.string_val) = "glute_max",
+  (common.v1.options.friendly_string) = "Glute max"];
+  MUSCLE_GROUP_GLUTE_MED_MIN = 7
+  [(common.v1.options.string_val) = "glute_med_min",
+  (common.v1.options.friendly_string) = "Glute med/min"];
+  MUSCLE_GROUP_ERECTOR_SPINAE = 8
+  [(common.v1.options.string_val) = "erector_spinae",
+  (common.v1.options.friendly_string) = "Erector spinae"];
+  MUSCLE_GROUP_ABS = 9
+  [(common.v1.options.string_val) = "abs",
+  (common.v1.options.friendly_string) = "Abs"];
+  MUSCLE_GROUP_WRIST_FLEXORS = 10
+  [(common.v1.options.string_val) = "wrist_flexors",
+  (common.v1.options.friendly_string) = "Wrist flexors"];
+  MUSCLE_GROUP_WRIST_EXTENSORS = 11
+  [(common.v1.options.string_val) = "wrist_extensors",
+  (common.v1.options.friendly_string) = "Wrist extensors"];
+  MUSCLE_GROUP_BRACHIORADIALIS = 12
+  [(common.v1.options.string_val) = "brachioradialis",
+  (common.v1.options.friendly_string) = "Brachioradialis"];
+  MUSCLE_GROUP_BICEPS = 13
+  [(common.v1.options.string_val) = "biceps",
+  (common.v1.options.friendly_string) = "Biceps"];
+  MUSCLE_GROUP_TRICEPS_LATERAL_MEDIAL = 14
+  [(common.v1.options.string_val) = "triceps_lateral_medial",
+  (common.v1.options.friendly_string) = "Triceps lateral/medial"];
+  MUSCLE_GROUP_TRICEPS_LONG_HEAD = 15
+  [(common.v1.options.string_val) = "triceps_long_head",
+  (common.v1.options.friendly_string) = "Triceps long head"];
+  MUSCLE_GROUP_FRONT_DELTS = 16
+  [(common.v1.options.string_val) = "front_delts",
+  (common.v1.options.friendly_string) = "Front delts"];
+  MUSCLE_GROUP_SIDE_DELTS = 17
+  [(common.v1.options.string_val) = "side_delts",
+  (common.v1.options.friendly_string) = "Side delts"];
+  MUSCLE_GROUP_REAR_DELTS = 18
+  [(common.v1.options.string_val) = "rear_delts",
+  (common.v1.options.friendly_string) = "Rear delts"];
+  MUSCLE_GROUP_CHEST = 19
+  [(common.v1.options.string_val) = "chest",
+  (common.v1.options.friendly_string) = "Chest"];
+  MUSCLE_GROUP_LATS = 20
+  [(common.v1.options.string_val) = "lats",
+  (common.v1.options.friendly_string) = "Lats"];
+  MUSCLE_GROUP_UPPER_BACK = 21
+  [(common.v1.options.string_val) = "upper_back",
+  (common.v1.options.friendly_string) = "Upper back"];
+  MUSCLE_GROUP_UPPER_TRAPS = 22
+  [(common.v1.options.string_val) = "upper_traps",
+  (common.v1.options.friendly_string) = "Upper traps"];
+  MUSCLE_GROUP_SOLEUS = 23
+  [(common.v1.options.string_val) = "soleus",
+  (common.v1.options.friendly_string) = "Soleus"];
+  MUSCLE_GROUP_GASTROCNEMIUS = 24
+  [(common.v1.options.string_val) = "gastrocnemius",
+  (common.v1.options.friendly_string) = "Gastrocnemius"];
+  MUSCLE_GROUP_NECK_EXTENSORS = 25
+  [(common.v1.options.string_val) = "neck_extensors",
+  (common.v1.options.friendly_string) = "Neck extensors"];
+  MUSCLE_GROUP_NECK_FLEXORS = 26
+  [(common.v1.options.string_val) = "neck_flexors",
+  (common.v1.options.friendly_string) = "Neck flexors"];
+}

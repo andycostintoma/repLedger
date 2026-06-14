@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package training.v1;
+
+import "common/v1/options/enum_friendly_string.proto";
+import "common/v1/options/enum_string_val.proto";
+
+option go_package = "workout-tracker/backend/pb/training/v1;trainingv1";
+
+enum WorkoutStatus {
+  WORKOUT_STATUS_UNKNOWN = 0
+  [(common.v1.options.string_val) = "",
+  (common.v1.options.friendly_string) = "Unknown"];
+  WORKOUT_STATUS_PLANNED = 1
+  [(common.v1.options.string_val) = "planned",
+  (common.v1.options.friendly_string) = "Planned"];
+  WORKOUT_STATUS_IN_PROGRESS = 2
+  [(common.v1.options.string_val) = "in-progress",
+  (common.v1.options.friendly_string) = "In progress"];
+  WORKOUT_STATUS_COMPLETED = 3
+  [(common.v1.options.string_val) = "completed",
+  (common.v1.options.friendly_string) = "Completed"];
+}

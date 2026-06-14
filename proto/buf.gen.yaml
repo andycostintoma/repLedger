@@ -1,0 +1,29 @@
+version: v2
+plugins:
+  - remote: buf.build/protocolbuffers/go:v1.36.10
+    out: ../backend
+    opt:
+      - paths=import
+      - module=workout-tracker/backend
+  - remote: buf.build/grpc/go:v1.5.1
+    out: ../backend
+    opt:
+      - paths=import
+      - module=workout-tracker/backend
+  - local: ../backend/bin/protoc-gen-training-options
+    out: ../backend
+    opt:
+      - paths=import
+      - module=workout-tracker/backend
+      - lang=go
+  - remote: buf.build/community/stephenh-ts-proto:v2.11.8
+    out: ../frontend/src/lib/gen/proto
+    opt:
+      - esModuleInterop=true
+      - forceLong=string
+      - snakeToCamel=true
+      - useOptionals=messages
+  - local: ../backend/bin/protoc-gen-training-options
+    out: ../frontend/src/lib/gen/proto
+    opt:
+      - lang=ts

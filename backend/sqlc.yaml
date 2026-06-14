@@ -1,0 +1,14 @@
+version: "2"
+sql:
+  - engine: postgresql
+    schema: schema.sql
+    queries: internal/training/outbound/postgres/queries.sql
+    gen:
+      go:
+        package: sqlc
+        out: internal/training/outbound/postgres/sqlc
+        sql_package: database/sql
+        emit_interface: true
+        overrides:
+          - db_type: pg_catalog.numeric
+            go_type: float64

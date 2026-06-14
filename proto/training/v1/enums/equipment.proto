@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package training.v1;
+
+import "common/v1/options/enum_friendly_string.proto";
+import "common/v1/options/enum_string_val.proto";
+
+option go_package = "workout-tracker/backend/pb/training/v1;trainingv1";
+
+enum Equipment {
+  EQUIPMENT_UNKNOWN = 0
+  [(common.v1.options.string_val) = "unknown",
+  (common.v1.options.friendly_string) = "Unknown"];
+  EQUIPMENT_BARBELL = 1
+  [(common.v1.options.string_val) = "barbell",
+  (common.v1.options.friendly_string) = "Barbell"];
+  EQUIPMENT_DUMBBELL = 2
+  [(common.v1.options.string_val) = "dumbbell",
+  (common.v1.options.friendly_string) = "Dumbbell"];
+  EQUIPMENT_MACHINE = 3
+  [(common.v1.options.string_val) = "machine",
+  (common.v1.options.friendly_string) = "Machine"];
+  EQUIPMENT_BODYWEIGHT_LOADABLE = 4
+  [(common.v1.options.string_val) = "bodyweight/loadable",
+  (common.v1.options.friendly_string) = "Bodyweight/loadable"];
+}

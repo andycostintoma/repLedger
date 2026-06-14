@@ -1,0 +1,39 @@
+name: workout-tracker
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: workout-tracker-postgres
+    hostname: postgres
+    environment:
+      POSTGRES_DB: training
+      POSTGRES_USER: training_user
+      POSTGRES_PASSWORD: training_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - workout-tracker-postgres:/var/lib/postgresql/data
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U training_user -d training"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  training-service:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: workout-tracker-training
+    hostname: training-service
+    environment:
+      GRPC_ADDR: ":9000"
+      PG_URL: "postgres://training_user:training_pass@postgres:5432/training?sslmode=disable&search_path=training,public"
+    ports:
+      - "9000:9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  workout-tracker-postgres:

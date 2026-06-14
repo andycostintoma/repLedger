@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package common.v1.options;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "workout-tracker/backend/pb/common/v1/options;commonoptionsv1";
+
+extend google.protobuf.EnumValueOptions {
+  optional string friendly_string = 50002;
+}

@@ -1,10 +1,1 @@
-node_modules/
-.svelte-kit/
-build/
-.env
-.env.*
-!.env.example
-*.sqlite
-*.sqlite-*
-.DS_Store
-.idea/
+backend/bin/

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package training.v1;
+
+import "common/v1/options/enum_friendly_string.proto";
+import "common/v1/options/enum_string_val.proto";
+
+option go_package = "workout-tracker/backend/pb/training/v1;trainingv1";
+
+enum FeedbackWorkload {
+  FEEDBACK_WORKLOAD_UNKNOWN = 0
+  [(common.v1.options.string_val) = "",
+  (common.v1.options.friendly_string) = "Unknown"];
+  FEEDBACK_WORKLOAD_TOO_LOW = 1
+  [(common.v1.options.string_val) = "too-low",
+  (common.v1.options.friendly_string) = "Too low"];
+  FEEDBACK_WORKLOAD_GOOD = 2
+  [(common.v1.options.string_val) = "good",
+  (common.v1.options.friendly_string) = "Good"];
+  FEEDBACK_WORKLOAD_TOO_HIGH = 3
+  [(common.v1.options.string_val) = "too-high",
+  (common.v1.options.friendly_string) = "Too high"];
+}

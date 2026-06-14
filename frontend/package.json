@@ -1,0 +1,31 @@
+{
+  "name": "workout-tracker",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --bun vite dev --host 0.0.0.0",
+    "build": "bun --bun vite build",
+    "preview": "bun --bun vite preview --host 0.0.0.0",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.11.1",
+    "@grpc/grpc-js": "^1.14.4",
+    "@vite-pwa/sveltekit": "latest",
+    "neverthrow": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "latest",
+    "@sveltejs/kit": "latest",
+    "@sveltejs/vite-plugin-svelte": "latest",
+    "@tailwindcss/vite": "latest",
+    "@types/bun": "latest",
+    "svelte": "latest",
+    "svelte-check": "latest",
+    "tailwindcss": "latest",
+    "typescript": "5.8.3",
+    "vite": "latest"
+  }
+}
