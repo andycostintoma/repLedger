@@ -52,6 +52,7 @@ const (
 	MuscleGroup_MUSCLE_GROUP_GASTROCNEMIUS             MuscleGroup = 24
 	MuscleGroup_MUSCLE_GROUP_NECK_EXTENSORS            MuscleGroup = 25
 	MuscleGroup_MUSCLE_GROUP_NECK_FLEXORS              MuscleGroup = 26
+	MuscleGroup_MUSCLE_GROUP_BRACHIALIS                MuscleGroup = 27
 )
 
 // Enum value maps for MuscleGroup.
@@ -84,6 +85,7 @@ var (
 		24: "MUSCLE_GROUP_GASTROCNEMIUS",
 		25: "MUSCLE_GROUP_NECK_EXTENSORS",
 		26: "MUSCLE_GROUP_NECK_FLEXORS",
+		27: "MUSCLE_GROUP_BRACHIALIS",
 	}
 	MuscleGroup_value = map[string]int32{
 		"MUSCLE_GROUP_UNKNOWN":                   0,
@@ -113,6 +115,7 @@ var (
 		"MUSCLE_GROUP_GASTROCNEMIUS":             24,
 		"MUSCLE_GROUP_NECK_EXTENSORS":            25,
 		"MUSCLE_GROUP_NECK_FLEXORS":              26,
+		"MUSCLE_GROUP_BRACHIALIS":                27,
 	}
 )
 
@@ -147,7 +150,7 @@ var File_training_v1_enums_muscle_group_proto protoreflect.FileDescriptor
 
 const file_training_v1_enums_muscle_group_proto_rawDesc = "" +
 	"\n" +
-	"$training/v1/enums/muscle_group.proto\x12\vtraining.v1\x1a,common/v1/options/enum_friendly_string.proto\x1a'common/v1/options/enum_string_val.proto*\xd8\r\n" +
+	"$training/v1/enums/muscle_group.proto\x12\vtraining.v1\x1a,common/v1/options/enum_friendly_string.proto\x1a'common/v1/options/enum_string_val.proto*\x93\x0e\n" +
 	"\vMuscleGroup\x12)\n" +
 	"\x14MUSCLE_GROUP_UNKNOWN\x10\x00\x1a\x0f\x8a\xb5\x18\x00\x92\xb5\x18\aUnknown\x12<\n" +
 	"\x18MUSCLE_GROUP_QUADS_VASTI\x10\x01\x1a\x1e\x8a\xb5\x18\vquads_vasti\x92\xb5\x18\vQuads vasti\x12E\n" +
@@ -182,7 +185,10 @@ const file_training_v1_enums_muscle_group_proto_rawDesc = "" +
 	"\x13MUSCLE_GROUP_SOLEUS\x10\x17\x1a\x14\x8a\xb5\x18\x06soleus\x92\xb5\x18\x06Soleus\x12B\n" +
 	"\x1aMUSCLE_GROUP_GASTROCNEMIUS\x10\x18\x1a\"\x8a\xb5\x18\rgastrocnemius\x92\xb5\x18\rGastrocnemius\x12E\n" +
 	"\x1bMUSCLE_GROUP_NECK_EXTENSORS\x10\x19\x1a$\x8a\xb5\x18\x0eneck_extensors\x92\xb5\x18\x0eNeck extensors\x12?\n" +
-	"\x19MUSCLE_GROUP_NECK_FLEXORS\x10\x1a\x1a \x8a\xb5\x18\fneck_flexors\x92\xb5\x18\fNeck flexorsB3Z1workout-tracker/backend/pb/training/v1;trainingv1b\x06proto3"
+	"\x19MUSCLE_GROUP_NECK_FLEXORS\x10\x1a\x1a \x8a\xb5\x18\fneck_flexors\x92\xb5\x18\fNeck flexors\x129\n" +
+	"\x17MUSCLE_GROUP_BRACHIALIS\x10\x1b\x1a\x1c\x8a\xb5\x18\n" +
+	"brachialis\x92\xb5\x18\n" +
+	"BrachialisB3Z1workout-tracker/backend/pb/training/v1;trainingv1b\x06proto3"
 
 var (
 	file_training_v1_enums_muscle_group_proto_rawDescOnce sync.Once

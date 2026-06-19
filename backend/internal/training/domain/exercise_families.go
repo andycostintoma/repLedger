@@ -1,9 +1,15 @@
 package domain
 
-import "strings"
+import (
+	"strings"
+
+	trainingv1 "workout-tracker/backend/pb/training/v1"
+)
+
+type ExerciseFamilyCode = trainingv1.ExerciseFamilyCode
 
 type ExerciseFamily struct {
-	ID           string
+	ID           ExerciseFamilyCode
 	Name         string
 	Category     string
 	Coefficients map[MuscleGroup]float64
@@ -11,153 +17,160 @@ type ExerciseFamily struct {
 }
 
 var ExerciseFamilies = []ExerciseFamily{
-	family("free_squat", "Free squat", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_FREE_SQUAT, "lower", map[MuscleGroup]float64{
 		MuscleQuadsVasti:    1,
 		MuscleGluteMax:      0.5,
 		MuscleAdductors:     0.5,
 		MuscleErectorSpinae: 0.5,
 	}),
-	family("supported_squat", "Supported squat", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_SUPPORTED_SQUAT, "lower", map[MuscleGroup]float64{
 		MuscleQuadsVasti: 1,
 		MuscleGluteMax:   0.5,
 		MuscleAdductors:  0.5,
 	}),
-	family("lunge_quad_focused", "Lunge quad-focused", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_LUNGE_QUAD_FOCUSED, "lower", map[MuscleGroup]float64{
 		MuscleQuadsVasti: 1,
 		MuscleGluteMax:   0.5,
 		MuscleAdductors:  0.5,
 	}),
-	family("lunge_glute_focused", "Lunge glute-focused", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_LUNGE_GLUTE_FOCUSED, "lower", map[MuscleGroup]float64{
 		MuscleGluteMax:   1,
 		MuscleQuadsVasti: 0.5,
 		MuscleAdductors:  0.5,
 	}),
-	family("knee_extension", "Knee extension", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_KNEE_EXTENSION, "lower", map[MuscleGroup]float64{
 		MuscleQuadsVasti:    1,
 		MuscleRectusFemoris: 1,
 	}),
-	family("knee_flexion", "Knee flexion", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_KNEE_FLEXION, "lower", map[MuscleGroup]float64{
 		MuscleHamstringsBiarticular:  1,
 		MuscleBicepsFemorisShortHead: 1,
 	}),
-	family("hip_hinge", "Hip hinge", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIP_HINGE, "lower", map[MuscleGroup]float64{
 		MuscleHamstringsBiarticular: 1,
 		MuscleGluteMax:              0.5,
 		MuscleErectorSpinae:         0.5,
 	}),
-	family("hip_hinge_from_floor", "Hip hinge from floor", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIP_HINGE_FROM_FLOOR, "lower", map[MuscleGroup]float64{
 		MuscleErectorSpinae:         0.5,
 		MuscleGluteMax:              0.5,
 		MuscleHamstringsBiarticular: 0.5,
 		MuscleQuadsVasti:            0.5,
 	}),
-	family("hip_thrust", "Hip thrust", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIP_THRUST, "lower", map[MuscleGroup]float64{
 		MuscleGluteMax: 1,
 	}),
-	family("hip_abduction", "Hip abduction", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIP_ABDUCTION, "lower", map[MuscleGroup]float64{
 		MuscleGluteMedMin: 1,
 	}),
-	family("straight_leg_calf_raise", "Straight-leg calf raise", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_STRAIGHT_LEG_CALF_RAISE, "lower", map[MuscleGroup]float64{
 		MuscleSoleus:        1,
 		MuscleGastrocnemius: 1,
 	}),
-	family("bent_leg_calf_raise", "Bent-leg calf raise", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_BENT_LEG_CALF_RAISE, "lower", map[MuscleGroup]float64{
 		MuscleSoleus: 1,
 	}),
-	family("loaded_spinal_flexion", "Loaded spinal flexion", "lower", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_LOADED_SPINAL_FLEXION, "lower", map[MuscleGroup]float64{
 		MuscleAbs: 1,
 	}),
-	family("horizontal_press_fixed_path", "Horizontal press fixed path", "pressing", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HORIZONTAL_PRESS_FIXED_PATH, "pressing", map[MuscleGroup]float64{
 		MuscleChest:                1,
 		MuscleTricepsLateralMedial: 0.5,
 		MuscleFrontDelts:           0.5,
 	}),
-	family("horizontal_press_free_path", "Horizontal press free path", "pressing", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HORIZONTAL_PRESS_FREE_PATH, "pressing", map[MuscleGroup]float64{
 		MuscleChest:      1,
 		MuscleFrontDelts: 0.5,
 	}),
-	family("chest_fly", "Chest fly", "pressing", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_CHEST_FLY, "pressing", map[MuscleGroup]float64{
 		MuscleChest: 1,
 	}),
-	family("vertical_press_fixed_path", "Vertical press fixed path", "pressing", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_VERTICAL_PRESS_FIXED_PATH, "pressing", map[MuscleGroup]float64{
 		MuscleFrontDelts:           1,
 		MuscleSideDelts:            0.5,
 		MuscleTricepsLateralMedial: 0.5,
 	}),
-	family("elbows_out_vertical_press", "Elbows-out vertical press", "pressing", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_ELBOWS_OUT_VERTICAL_PRESS, "pressing", map[MuscleGroup]float64{
 		MuscleSideDelts:            1,
 		MuscleFrontDelts:           0.5,
 		MuscleTricepsLateralMedial: 0.5,
 	}),
-	family("vertical_pull", "Vertical pull", "pulling", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_VERTICAL_PULL, "pulling", map[MuscleGroup]float64{
 		MuscleLats:      1,
 		MuscleBiceps:    0.5,
 		MuscleUpperBack: 0.5,
 	}),
-	family("shoulder_extension_pull", "Shoulder extension pull", "pulling", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_SHOULDER_EXTENSION_PULL, "pulling", map[MuscleGroup]float64{
 		MuscleLats:            1,
 		MuscleTricepsLongHead: 0.5,
 	}),
-	family("row", "Row", "pulling", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_ROW, "pulling", map[MuscleGroup]float64{
 		MuscleUpperBack: 1,
 		MuscleLats:      0.5,
 		MuscleBiceps:    0.5,
 		MuscleRearDelts: 0.5,
 	}),
-	family("flexion_row", "Flexion row", "pulling", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_FLEXION_ROW, "pulling", map[MuscleGroup]float64{
 		MuscleErectorSpinae: 1,
 		MuscleUpperBack:     0.5,
 		MuscleLats:          0.5,
 		MuscleBiceps:        0.5,
 	}),
-	family("high_row", "High row", "pulling", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIGH_ROW, "pulling", map[MuscleGroup]float64{
 		MuscleUpperBack: 1,
 		MuscleRearDelts: 1,
 	}),
-	family("shrug", "Shrug", "pulling", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_SHRUG, "pulling", map[MuscleGroup]float64{
 		MuscleUpperTraps: 1,
 	}),
-	family("lateral_raise", "Lateral raise", "shoulders", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_LATERAL_RAISE, "shoulders", map[MuscleGroup]float64{
 		MuscleSideDelts: 1,
 	}),
-	family("rear_delt_fly", "Rear-delt fly", "shoulders", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_REAR_DELT_FLY, "shoulders", map[MuscleGroup]float64{
 		MuscleRearDelts: 1,
 	}),
-	family("elbow_flexion", "Elbow flexion", "arms", map[MuscleGroup]float64{
-		MuscleBiceps: 1,
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_ELBOW_FLEXION, "arms", map[MuscleGroup]float64{
+		MuscleBiceps:     1,
+		MuscleBrachialis: 0.5,
 	}),
-	family("brachioradialis_curl", "Brachioradialis curl", "arms", map[MuscleGroup]float64{
-		MuscleBrachioradialis: 1,
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_BRACHIALIS_CURL, "arms", map[MuscleGroup]float64{
+		MuscleBrachialis:      1,
+		MuscleBrachioradialis: 0.5,
 		MuscleBiceps:          0.5,
 	}),
-	family("overhead_triceps_extension", "Overhead triceps extension", "arms", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_BRACHIORADIALIS_CURL, "arms", map[MuscleGroup]float64{
+		MuscleBrachioradialis: 1,
+		MuscleBrachialis:      0.5,
+		MuscleBiceps:          0.5,
+	}),
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_OVERHEAD_TRICEPS_EXTENSION, "arms", map[MuscleGroup]float64{
 		MuscleTricepsLongHead:      1,
 		MuscleTricepsLateralMedial: 1,
 	}),
-	family("triceps_pushdown", "Triceps pushdown", "arms", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_TRICEPS_PUSHDOWN, "arms", map[MuscleGroup]float64{
 		MuscleTricepsLateralMedial: 1,
 	}),
-	family("wrist_flexion", "Wrist flexion", "arms", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_WRIST_FLEXION, "arms", map[MuscleGroup]float64{
 		MuscleWristFlexors: 1,
 	}),
-	family("wrist_extension", "Wrist extension", "arms", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_WRIST_EXTENSION, "arms", map[MuscleGroup]float64{
 		MuscleWristExtensors: 1,
 	}),
-	family("neck_flexion", "Neck flexion", "neck", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_NECK_FLEXION, "neck", map[MuscleGroup]float64{
 		MuscleNeckFlexors: 1,
 	}),
-	family("neck_extension", "Neck extension", "neck", map[MuscleGroup]float64{
+	family(trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_NECK_EXTENSION, "neck", map[MuscleGroup]float64{
 		MuscleNeckExtensors: 1,
 	}),
 }
 
-func family(id, name, category string, coefficients map[MuscleGroup]float64) ExerciseFamily {
-	return ExerciseFamily{ID: id, Name: name, Category: category, Coefficients: coefficients}
+func family(id ExerciseFamilyCode, category string, coefficients map[MuscleGroup]float64) ExerciseFamily {
+	return ExerciseFamily{ID: id, Name: id.FriendlyString(), Category: category, Coefficients: coefficients}
 }
 
 func GetExerciseFamily(id string) *ExerciseFamily {
 	for _, family := range ExerciseFamilies {
-		if family.ID == id {
+		if family.ID == trainingv1.StringToExerciseFamilyCode(id) {
 			return new(family)
 		}
 	}
@@ -177,53 +190,54 @@ func SuggestExerciseFamilyID(name string, equipment string) *string {
 
 func firstMatchingFamily(normalized string, normalizedEquipment string) *string {
 	checks := []struct {
-		id string
+		id ExerciseFamilyCode
 		ok bool
 	}{
-		{"hip_hinge", strings.Contains(normalized, "belt squat") && containsAny(normalized, "rdl", "romanian")},
-		{"supported_squat", strings.Contains(normalized, "belt squat")},
-		{"straight_leg_calf_raise", strings.Contains(normalized, "pendulum") && containsAny(normalized, "calf", "raise")},
-		{"supported_squat", strings.Contains(normalized, "pendulum")},
-		{"supported_squat", strings.Contains(normalized, "hack squat") || strings.Contains(normalized, "machine squat")},
-		{"straight_leg_calf_raise", strings.Contains(normalized, "leg press") && containsAny(normalized, "calf", "raise")},
-		{"supported_squat", strings.Contains(normalized, "leg press")},
-		{"lunge_glute_focused", containsAny(normalized, "front foot", "long stride") || strings.Contains(normalized, "glute") && containsAny(normalized, "lunge", "split squat", "bulgarian")},
-		{"lunge_quad_focused", containsAny(normalized, "lunge", "split squat", "bulgarian")},
-		{"free_squat", strings.Contains(normalized, "squat")},
-		{"knee_extension", strings.Contains(normalized, "leg extension") || strings.Contains(normalized, "sissy") || strings.Contains(normalized, "reverse nordic")},
-		{"knee_flexion", containsAny(normalized, "leg curl", "hamstring curl", "nordic")},
-		{"hip_hinge", containsAny(normalized, "rdl", "romanian", "good morning")},
-		{"hip_hinge_from_floor", strings.Contains(normalized, "deadlift")},
-		{"hip_thrust", strings.Contains(normalized, "hip thrust") || strings.Contains(normalized, "bridge")},
-		{"hip_abduction", strings.Contains(normalized, "abduction")},
-		{"bent_leg_calf_raise", strings.Contains(normalized, "seated") && strings.Contains(normalized, "calf") || strings.Contains(normalized, "bent") && strings.Contains(normalized, "calf")},
-		{"straight_leg_calf_raise", strings.Contains(normalized, "calf") || strings.Contains(normalized, "calves")},
-		{"loaded_spinal_flexion", containsAny(normalized, "crunch", "sit up", "situp", "leg raise", "knee raise")},
-		{"shoulder_extension_pull", containsAny(normalized, "pullover", "lat prayer", "straight arm")},
-		{"vertical_pull", containsAny(normalized, "pullup", "pull-up", "pulldown", "chinup", "chin-up")},
-		{"high_row", containsAny(normalized, "face pull", "high row", "rear delt row")},
-		{"flexion_row", strings.Contains(normalized, "flexion row")},
-		{"row", containsAny(normalized, "row", "t-bar", "tbar")},
-		{"shrug", strings.Contains(normalized, "shrug")},
-		{"lateral_raise", containsAny(normalized, "lateral raise", "butterfly raise", "upright row")},
-		{"rear_delt_fly", containsAny(normalized, "rear delt", "rear-delt", "reverse fly")},
-		{"overhead_triceps_extension", containsAny(normalized, "overhead triceps", "oh extension", "skull")},
-		{"triceps_pushdown", strings.Contains(normalized, "pushdown")},
-		{"brachioradialis_curl", strings.Contains(normalized, "hammer curl") || strings.Contains(normalized, "reverse curl")},
-		{"elbow_flexion", containsAny(normalized, "preacher", "bayesian", "incline curl") || strings.Contains(normalized, "curl")},
-		{"wrist_extension", strings.Contains(normalized, "wrist") && strings.Contains(normalized, "extension")},
-		{"wrist_flexion", strings.Contains(normalized, "wrist")},
-		{"neck_flexion", strings.Contains(normalized, "neck") && strings.Contains(normalized, "flex")},
-		{"neck_extension", strings.Contains(normalized, "neck") && strings.Contains(normalized, "ext")},
-		{"chest_fly", containsAny(normalized, "fly", "flye", "pec deck")},
-		{"elbows_out_vertical_press", containsAny(normalized, "elbows out", "out elbows", "frontal plane", "frontal-plane", "butterfly press")},
-		{"vertical_press_fixed_path", strings.Contains(normalized, "overhead press") || strings.Contains(normalized, "shoulder press")},
-		{"horizontal_press_free_path", containsAny(normalized, "bench", "press", "dip") && (strings.Contains(normalizedEquipment, "dumbbell") || strings.Contains(normalizedEquipment, "cable"))},
-		{"horizontal_press_fixed_path", containsAny(normalized, "bench", "press", "dip")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIP_HINGE, strings.Contains(normalized, "belt squat") && containsAny(normalized, "rdl", "romanian")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_SUPPORTED_SQUAT, strings.Contains(normalized, "belt squat")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_STRAIGHT_LEG_CALF_RAISE, strings.Contains(normalized, "pendulum") && containsAny(normalized, "calf", "raise")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_SUPPORTED_SQUAT, strings.Contains(normalized, "pendulum")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_SUPPORTED_SQUAT, strings.Contains(normalized, "hack squat") || strings.Contains(normalized, "machine squat")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_STRAIGHT_LEG_CALF_RAISE, strings.Contains(normalized, "leg press") && containsAny(normalized, "calf", "raise")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_SUPPORTED_SQUAT, strings.Contains(normalized, "leg press")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_LUNGE_GLUTE_FOCUSED, containsAny(normalized, "front foot", "long stride") || strings.Contains(normalized, "glute") && containsAny(normalized, "lunge", "split squat", "bulgarian")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_LUNGE_QUAD_FOCUSED, containsAny(normalized, "lunge", "split squat", "bulgarian")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_FREE_SQUAT, strings.Contains(normalized, "squat")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_KNEE_EXTENSION, strings.Contains(normalized, "leg extension") || strings.Contains(normalized, "sissy") || strings.Contains(normalized, "reverse nordic")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_KNEE_FLEXION, containsAny(normalized, "leg curl", "hamstring curl", "nordic")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIP_HINGE, containsAny(normalized, "rdl", "romanian", "good morning")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIP_HINGE_FROM_FLOOR, strings.Contains(normalized, "deadlift")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIP_THRUST, strings.Contains(normalized, "hip thrust") || strings.Contains(normalized, "bridge")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIP_ABDUCTION, strings.Contains(normalized, "abduction")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_BENT_LEG_CALF_RAISE, strings.Contains(normalized, "seated") && strings.Contains(normalized, "calf") || strings.Contains(normalized, "bent") && strings.Contains(normalized, "calf")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_STRAIGHT_LEG_CALF_RAISE, strings.Contains(normalized, "calf") || strings.Contains(normalized, "calves")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_LOADED_SPINAL_FLEXION, containsAny(normalized, "crunch", "sit up", "situp", "leg raise", "knee raise")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_SHOULDER_EXTENSION_PULL, containsAny(normalized, "pullover", "lat prayer", "straight arm")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_VERTICAL_PULL, containsAny(normalized, "pullup", "pull-up", "pulldown", "chinup", "chin-up")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HIGH_ROW, containsAny(normalized, "face pull", "high row", "rear delt row")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_FLEXION_ROW, strings.Contains(normalized, "flexion row")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_ROW, containsAny(normalized, "row", "t-bar", "tbar")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_SHRUG, strings.Contains(normalized, "shrug")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_LATERAL_RAISE, containsAny(normalized, "lateral raise", "butterfly raise", "upright row")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_REAR_DELT_FLY, containsAny(normalized, "rear delt", "rear-delt", "reverse fly")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_OVERHEAD_TRICEPS_EXTENSION, containsAny(normalized, "overhead triceps", "oh extension", "skull")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_TRICEPS_PUSHDOWN, strings.Contains(normalized, "pushdown")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_BRACHIORADIALIS_CURL, strings.Contains(normalized, "reverse curl")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_BRACHIALIS_CURL, containsAny(normalized, "hammer curl", "cross-body curl", "cross body curl", "neutral curl")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_ELBOW_FLEXION, containsAny(normalized, "preacher", "bayesian", "incline curl") || strings.Contains(normalized, "curl")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_WRIST_EXTENSION, strings.Contains(normalized, "wrist") && strings.Contains(normalized, "extension")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_WRIST_FLEXION, strings.Contains(normalized, "wrist")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_NECK_FLEXION, strings.Contains(normalized, "neck") && strings.Contains(normalized, "flex")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_NECK_EXTENSION, strings.Contains(normalized, "neck") && strings.Contains(normalized, "ext")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_CHEST_FLY, containsAny(normalized, "fly", "flye", "pec deck")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_ELBOWS_OUT_VERTICAL_PRESS, containsAny(normalized, "elbows out", "out elbows", "frontal plane", "frontal-plane", "butterfly press")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_VERTICAL_PRESS_FIXED_PATH, strings.Contains(normalized, "overhead press") || strings.Contains(normalized, "shoulder press")},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HORIZONTAL_PRESS_FREE_PATH, containsAny(normalized, "bench", "press", "dip") && (strings.Contains(normalizedEquipment, "dumbbell") || strings.Contains(normalizedEquipment, "cable"))},
+		{trainingv1.ExerciseFamilyCode_EXERCISE_FAMILY_CODE_HORIZONTAL_PRESS_FIXED_PATH, containsAny(normalized, "bench", "press", "dip")},
 	}
 	for _, check := range checks {
 		if check.ok {
-			return new(check.id)
+			return new(check.id.StringVal())
 		}
 	}
 	return nil

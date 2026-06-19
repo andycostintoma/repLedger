@@ -53,13 +53,14 @@ const (
 	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_LATERAL_RAISE               ExerciseFamilyCode = 25
 	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_REAR_DELT_FLY               ExerciseFamilyCode = 26
 	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_ELBOW_FLEXION               ExerciseFamilyCode = 27
-	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_BRACHIORADIALIS_CURL        ExerciseFamilyCode = 28
-	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_OVERHEAD_TRICEPS_EXTENSION  ExerciseFamilyCode = 29
-	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_TRICEPS_PUSHDOWN            ExerciseFamilyCode = 30
-	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_WRIST_FLEXION               ExerciseFamilyCode = 31
-	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_WRIST_EXTENSION             ExerciseFamilyCode = 32
-	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_NECK_FLEXION                ExerciseFamilyCode = 33
-	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_NECK_EXTENSION              ExerciseFamilyCode = 34
+	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_BRACHIALIS_CURL             ExerciseFamilyCode = 28
+	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_BRACHIORADIALIS_CURL        ExerciseFamilyCode = 29
+	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_OVERHEAD_TRICEPS_EXTENSION  ExerciseFamilyCode = 30
+	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_TRICEPS_PUSHDOWN            ExerciseFamilyCode = 31
+	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_WRIST_FLEXION               ExerciseFamilyCode = 32
+	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_WRIST_EXTENSION             ExerciseFamilyCode = 33
+	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_NECK_FLEXION                ExerciseFamilyCode = 34
+	ExerciseFamilyCode_EXERCISE_FAMILY_CODE_NECK_EXTENSION              ExerciseFamilyCode = 35
 )
 
 // Enum value maps for ExerciseFamilyCode.
@@ -93,13 +94,14 @@ var (
 		25: "EXERCISE_FAMILY_CODE_LATERAL_RAISE",
 		26: "EXERCISE_FAMILY_CODE_REAR_DELT_FLY",
 		27: "EXERCISE_FAMILY_CODE_ELBOW_FLEXION",
-		28: "EXERCISE_FAMILY_CODE_BRACHIORADIALIS_CURL",
-		29: "EXERCISE_FAMILY_CODE_OVERHEAD_TRICEPS_EXTENSION",
-		30: "EXERCISE_FAMILY_CODE_TRICEPS_PUSHDOWN",
-		31: "EXERCISE_FAMILY_CODE_WRIST_FLEXION",
-		32: "EXERCISE_FAMILY_CODE_WRIST_EXTENSION",
-		33: "EXERCISE_FAMILY_CODE_NECK_FLEXION",
-		34: "EXERCISE_FAMILY_CODE_NECK_EXTENSION",
+		28: "EXERCISE_FAMILY_CODE_BRACHIALIS_CURL",
+		29: "EXERCISE_FAMILY_CODE_BRACHIORADIALIS_CURL",
+		30: "EXERCISE_FAMILY_CODE_OVERHEAD_TRICEPS_EXTENSION",
+		31: "EXERCISE_FAMILY_CODE_TRICEPS_PUSHDOWN",
+		32: "EXERCISE_FAMILY_CODE_WRIST_FLEXION",
+		33: "EXERCISE_FAMILY_CODE_WRIST_EXTENSION",
+		34: "EXERCISE_FAMILY_CODE_NECK_FLEXION",
+		35: "EXERCISE_FAMILY_CODE_NECK_EXTENSION",
 	}
 	ExerciseFamilyCode_value = map[string]int32{
 		"EXERCISE_FAMILY_CODE_UNKNOWN":                     0,
@@ -130,13 +132,14 @@ var (
 		"EXERCISE_FAMILY_CODE_LATERAL_RAISE":               25,
 		"EXERCISE_FAMILY_CODE_REAR_DELT_FLY":               26,
 		"EXERCISE_FAMILY_CODE_ELBOW_FLEXION":               27,
-		"EXERCISE_FAMILY_CODE_BRACHIORADIALIS_CURL":        28,
-		"EXERCISE_FAMILY_CODE_OVERHEAD_TRICEPS_EXTENSION":  29,
-		"EXERCISE_FAMILY_CODE_TRICEPS_PUSHDOWN":            30,
-		"EXERCISE_FAMILY_CODE_WRIST_FLEXION":               31,
-		"EXERCISE_FAMILY_CODE_WRIST_EXTENSION":             32,
-		"EXERCISE_FAMILY_CODE_NECK_FLEXION":                33,
-		"EXERCISE_FAMILY_CODE_NECK_EXTENSION":              34,
+		"EXERCISE_FAMILY_CODE_BRACHIALIS_CURL":             28,
+		"EXERCISE_FAMILY_CODE_BRACHIORADIALIS_CURL":        29,
+		"EXERCISE_FAMILY_CODE_OVERHEAD_TRICEPS_EXTENSION":  30,
+		"EXERCISE_FAMILY_CODE_TRICEPS_PUSHDOWN":            31,
+		"EXERCISE_FAMILY_CODE_WRIST_FLEXION":               32,
+		"EXERCISE_FAMILY_CODE_WRIST_EXTENSION":             33,
+		"EXERCISE_FAMILY_CODE_NECK_FLEXION":                34,
+		"EXERCISE_FAMILY_CODE_NECK_EXTENSION":              35,
 	}
 )
 
@@ -171,7 +174,7 @@ var File_training_v1_enums_exercise_family_code_proto protoreflect.FileDescripto
 
 const file_training_v1_enums_exercise_family_code_proto_rawDesc = "" +
 	"\n" +
-	",training/v1/enums/exercise_family_code.proto\x12\vtraining.v1\x1a,common/v1/options/enum_friendly_string.proto\x1a'common/v1/options/enum_string_val.proto*\xf0\x16\n" +
+	",training/v1/enums/exercise_family_code.proto\x12\vtraining.v1\x1a,common/v1/options/enum_friendly_string.proto\x1a'common/v1/options/enum_string_val.proto*\xc2\x17\n" +
 	"\x12ExerciseFamilyCode\x121\n" +
 	"\x1cEXERCISE_FAMILY_CODE_UNKNOWN\x10\x00\x1a\x0f\x8a\xb5\x18\x00\x92\xb5\x18\aUnknown\x12A\n" +
 	"\x1fEXERCISE_FAMILY_CODE_FREE_SQUAT\x10\x01\x1a\x1c\x8a\xb5\x18\n" +
@@ -205,14 +208,15 @@ const file_training_v1_enums_exercise_family_code_proto_rawDesc = "" +
 	"\x1aEXERCISE_FAMILY_CODE_SHRUG\x10\x18\x1a\x12\x8a\xb5\x18\x05shrug\x92\xb5\x18\x05Shrug\x12J\n" +
 	"\"EXERCISE_FAMILY_CODE_LATERAL_RAISE\x10\x19\x1a\"\x8a\xb5\x18\rlateral_raise\x92\xb5\x18\rLateral raise\x12J\n" +
 	"\"EXERCISE_FAMILY_CODE_REAR_DELT_FLY\x10\x1a\x1a\"\x8a\xb5\x18\rrear_delt_fly\x92\xb5\x18\rRear-delt fly\x12J\n" +
-	"\"EXERCISE_FAMILY_CODE_ELBOW_FLEXION\x10\x1b\x1a\"\x8a\xb5\x18\relbow_flexion\x92\xb5\x18\rElbow flexion\x12_\n" +
-	")EXERCISE_FAMILY_CODE_BRACHIORADIALIS_CURL\x10\x1c\x1a0\x8a\xb5\x18\x14brachioradialis_curl\x92\xb5\x18\x14Brachioradialis curl\x12q\n" +
-	"/EXERCISE_FAMILY_CODE_OVERHEAD_TRICEPS_EXTENSION\x10\x1d\x1a<\x8a\xb5\x18\x1aoverhead_triceps_extension\x92\xb5\x18\x1aOverhead triceps extension\x12S\n" +
-	"%EXERCISE_FAMILY_CODE_TRICEPS_PUSHDOWN\x10\x1e\x1a(\x8a\xb5\x18\x10triceps_pushdown\x92\xb5\x18\x10Triceps pushdown\x12J\n" +
-	"\"EXERCISE_FAMILY_CODE_WRIST_FLEXION\x10\x1f\x1a\"\x8a\xb5\x18\rwrist_flexion\x92\xb5\x18\rWrist flexion\x12P\n" +
-	"$EXERCISE_FAMILY_CODE_WRIST_EXTENSION\x10 \x1a&\x8a\xb5\x18\x0fwrist_extension\x92\xb5\x18\x0fWrist extension\x12G\n" +
-	"!EXERCISE_FAMILY_CODE_NECK_FLEXION\x10!\x1a \x8a\xb5\x18\fneck_flexion\x92\xb5\x18\fNeck flexion\x12M\n" +
-	"#EXERCISE_FAMILY_CODE_NECK_EXTENSION\x10\"\x1a$\x8a\xb5\x18\x0eneck_extension\x92\xb5\x18\x0eNeck extensionB3Z1workout-tracker/backend/pb/training/v1;trainingv1b\x06proto3"
+	"\"EXERCISE_FAMILY_CODE_ELBOW_FLEXION\x10\x1b\x1a\"\x8a\xb5\x18\relbow_flexion\x92\xb5\x18\rElbow flexion\x12P\n" +
+	"$EXERCISE_FAMILY_CODE_BRACHIALIS_CURL\x10\x1c\x1a&\x8a\xb5\x18\x0fbrachialis_curl\x92\xb5\x18\x0fBrachialis curl\x12_\n" +
+	")EXERCISE_FAMILY_CODE_BRACHIORADIALIS_CURL\x10\x1d\x1a0\x8a\xb5\x18\x14brachioradialis_curl\x92\xb5\x18\x14Brachioradialis curl\x12q\n" +
+	"/EXERCISE_FAMILY_CODE_OVERHEAD_TRICEPS_EXTENSION\x10\x1e\x1a<\x8a\xb5\x18\x1aoverhead_triceps_extension\x92\xb5\x18\x1aOverhead triceps extension\x12S\n" +
+	"%EXERCISE_FAMILY_CODE_TRICEPS_PUSHDOWN\x10\x1f\x1a(\x8a\xb5\x18\x10triceps_pushdown\x92\xb5\x18\x10Triceps pushdown\x12J\n" +
+	"\"EXERCISE_FAMILY_CODE_WRIST_FLEXION\x10 \x1a\"\x8a\xb5\x18\rwrist_flexion\x92\xb5\x18\rWrist flexion\x12P\n" +
+	"$EXERCISE_FAMILY_CODE_WRIST_EXTENSION\x10!\x1a&\x8a\xb5\x18\x0fwrist_extension\x92\xb5\x18\x0fWrist extension\x12G\n" +
+	"!EXERCISE_FAMILY_CODE_NECK_FLEXION\x10\"\x1a \x8a\xb5\x18\fneck_flexion\x92\xb5\x18\fNeck flexion\x12M\n" +
+	"#EXERCISE_FAMILY_CODE_NECK_EXTENSION\x10#\x1a$\x8a\xb5\x18\x0eneck_extension\x92\xb5\x18\x0eNeck extensionB3Z1workout-tracker/backend/pb/training/v1;trainingv1b\x06proto3"
 
 var (
 	file_training_v1_enums_exercise_family_code_proto_rawDescOnce sync.Once

@@ -8,6 +8,7 @@ export const equipmentStringValMap: Partial<Record<Equipment, string>> = {
 [Equipment.EQUIPMENT_DUMBBELL]: "dumbbell",
 [Equipment.EQUIPMENT_MACHINE]: "machine",
 [Equipment.EQUIPMENT_BODYWEIGHT_LOADABLE]: "bodyweight/loadable",
+[Equipment.EQUIPMENT_CABLE]: "cable",
 };
 
 export const equipmentFriendlyStringMap: Partial<Record<Equipment, string>> = {
@@ -16,6 +17,7 @@ export const equipmentFriendlyStringMap: Partial<Record<Equipment, string>> = {
 [Equipment.EQUIPMENT_DUMBBELL]: "Dumbbell",
 [Equipment.EQUIPMENT_MACHINE]: "Machine",
 [Equipment.EQUIPMENT_BODYWEIGHT_LOADABLE]: "Bodyweight/loadable",
+[Equipment.EQUIPMENT_CABLE]: "Cable",
 };
 
 const equipmentReverseStringValMap: Record<string, Equipment> = {
@@ -24,6 +26,7 @@ const equipmentReverseStringValMap: Record<string, Equipment> = {
 "dumbbell": Equipment.EQUIPMENT_DUMBBELL,
 "machine": Equipment.EQUIPMENT_MACHINE,
 "bodyweight/loadable": Equipment.EQUIPMENT_BODYWEIGHT_LOADABLE,
+"cable": Equipment.EQUIPMENT_CABLE,
 };
 
 export const equipmentStringVal = (value: Equipment): string => equipmentStringValMap[value] ?? '';

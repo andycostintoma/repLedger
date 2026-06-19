@@ -73,12 +73,12 @@ func (s Server) SaveMuscleFeedback(ctx context.Context, req *trainingv1.SaveMusc
 	if req.Pump != nil {
 		pump = new(int(*req.Pump))
 	}
-	err := s.app.Commands.SaveMuscleFeedback.Handle(ctx, command.SaveMuscleFeedback{SessionID: req.GetSessionId(), Muscle: domain.MuscleGroup(req.GetMuscle().StringVal()), Soreness: soreness, Pump: pump, Workload: optionalFeedbackWorkloadString(req.Workload), Notes: req.Notes})
+	err := s.app.Commands.SaveMuscleFeedback.Handle(ctx, command.SaveMuscleFeedback{SessionID: req.GetSessionId(), Muscle: req.GetMuscle(), Soreness: soreness, Pump: pump, Workload: optionalFeedbackWorkloadString(req.Workload), Notes: req.Notes})
 	return &trainingv1.SaveMuscleFeedbackResponse{}, err
 }
 
 func (s Server) SaveSuggestion(ctx context.Context, req *trainingv1.SaveSuggestionRequest) (*trainingv1.SaveSuggestionResponse, error) {
-	err := s.app.Commands.SaveSuggestion.Handle(ctx, command.SaveSuggestion{SessionID: req.GetSessionId(), Muscle: domain.MuscleGroup(req.GetMuscle().StringVal()), Suggestion: req.GetSuggestion(), Status: req.GetStatus().StringVal()})
+	err := s.app.Commands.SaveSuggestion.Handle(ctx, command.SaveSuggestion{SessionID: req.GetSessionId(), Muscle: req.GetMuscle(), Suggestion: req.GetSuggestion(), Status: req.GetStatus().StringVal()})
 	return &trainingv1.SaveSuggestionResponse{}, err
 }
 
@@ -104,7 +104,7 @@ func (s Server) CreateTemplateMesocycle(ctx context.Context, req *trainingv1.Cre
 }
 
 func (s Server) CreateExercise(ctx context.Context, req *trainingv1.CreateExerciseRequest) (*trainingv1.CreateExerciseResponse, error) {
-	id, err := s.app.Commands.CreateExercise.Handle(ctx, command.CreateExercise{Name: req.GetName(), PrimaryMuscle: domain.MuscleGroup(req.GetPrimaryMuscle().StringVal()), Equipment: req.GetEquipment().StringVal(), FamilyID: optionalExerciseFamilyString(req.FamilyId), Coefficients: coefficientsFromProto(req.GetCoefficients())})
+	id, err := s.app.Commands.CreateExercise.Handle(ctx, command.CreateExercise{Name: req.GetName(), PrimaryMuscle: req.GetPrimaryMuscle(), Equipment: req.GetEquipment().StringVal(), FamilyID: optionalExerciseFamilyString(req.FamilyId), Coefficients: coefficientsFromProto(req.GetCoefficients())})
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (s Server) UpdateExerciseCoefficients(ctx context.Context, req *trainingv1.
 func trainingCatalogToProto(catalog domain.TrainingCatalog) *trainingv1.GetTrainingCatalogResponse {
 	muscleGroups := make([]trainingv1.MuscleGroup, 0, len(catalog.MuscleGroups))
 	for _, muscle := range catalog.MuscleGroups {
-		muscleGroups = append(muscleGroups, trainingv1.StringToMuscleGroup(string(muscle)))
+		muscleGroups = append(muscleGroups, muscle)
 	}
 
 	exercises := make([]*trainingv1.Exercise, 0, len(catalog.Exercises))
@@ -194,12 +194,12 @@ func todayWorkoutToProto(workout domain.TodayWorkout) *trainingv1.GetTodayWorkou
 func exerciseToProto(exercise domain.ExerciseSummary) *trainingv1.Exercise {
 	primaryMuscles := make([]trainingv1.MuscleGroup, 0, len(exercise.PrimaryMuscles))
 	for _, muscle := range exercise.PrimaryMuscles {
-		primaryMuscles = append(primaryMuscles, trainingv1.StringToMuscleGroup(string(muscle)))
+		primaryMuscles = append(primaryMuscles, muscle)
 	}
 
 	secondaryMuscles := make([]trainingv1.MuscleGroup, 0, len(exercise.SecondaryMuscles))
 	for _, muscle := range exercise.SecondaryMuscles {
-		secondaryMuscles = append(secondaryMuscles, trainingv1.StringToMuscleGroup(string(muscle)))
+		secondaryMuscles = append(secondaryMuscles, muscle)
 	}
 
 	coefficients := coefficientsToProto(exercise.MuscleCoefficients)
@@ -207,7 +207,7 @@ func exerciseToProto(exercise domain.ExerciseSummary) *trainingv1.Exercise {
 	protoExercise := &trainingv1.Exercise{
 		Id:                 exercise.ID,
 		Name:               exercise.Name,
-		PrimaryMuscle:      trainingv1.StringToMuscleGroup(string(exercise.PrimaryMuscle)),
+		PrimaryMuscle:      exercise.PrimaryMuscle,
 		PrimaryMuscles:     primaryMuscles,
 		SecondaryMuscles:   secondaryMuscles,
 		MuscleCoefficients: coefficients,
@@ -224,7 +224,7 @@ func exerciseToProto(exercise domain.ExerciseSummary) *trainingv1.Exercise {
 func coefficientsToProto(coefficients []domain.ExerciseMuscleCoefficient) []*trainingv1.ExerciseMuscleCoefficient {
 	items := make([]*trainingv1.ExerciseMuscleCoefficient, 0, len(coefficients))
 	for _, coefficient := range coefficients {
-		items = append(items, &trainingv1.ExerciseMuscleCoefficient{Muscle: trainingv1.StringToMuscleGroup(string(coefficient.Muscle)), Coefficient: coefficient.Coefficient})
+		items = append(items, &trainingv1.ExerciseMuscleCoefficient{Muscle: coefficient.Muscle, Coefficient: coefficient.Coefficient})
 	}
 	return items
 }
@@ -232,7 +232,7 @@ func coefficientsToProto(coefficients []domain.ExerciseMuscleCoefficient) []*tra
 func plannedExercisesToProto(exercises []domain.PlannedExercise) []*trainingv1.PlannedExercise {
 	items := make([]*trainingv1.PlannedExercise, 0, len(exercises))
 	for _, exercise := range exercises {
-		item := &trainingv1.PlannedExercise{Id: exercise.ID, ExerciseId: exercise.ExerciseID, Name: exercise.Name, Equipment: trainingv1.StringToEquipment(exercise.Equipment), Method: trainingv1.StringToTrainingMethod(string(exercise.Method)), ProgrammedSets: int32(exercise.ProgrammedSets), TargetRepRange: exercise.TargetRepRange, PreviousPerformance: exercise.PreviousPerformance, PrimaryMuscle: trainingv1.StringToMuscleGroup(string(exercise.PrimaryMuscle)), LoggedSets: loggedSetsToProto(exercise.LoggedSets)}
+		item := &trainingv1.PlannedExercise{Id: exercise.ID, ExerciseId: exercise.ExerciseID, Name: exercise.Name, Equipment: trainingv1.StringToEquipment(exercise.Equipment), Method: exercise.Method, ProgrammedSets: int32(exercise.ProgrammedSets), TargetRepRange: exercise.TargetRepRange, PreviousPerformance: exercise.PreviousPerformance, PrimaryMuscle: exercise.PrimaryMuscle, LoggedSets: loggedSetsToProto(exercise.LoggedSets)}
 		if exercise.Feedback != nil {
 			feedback := &trainingv1.ExerciseFeedback{Notes: exercise.Feedback.Notes}
 			if exercise.Feedback.PainAfter != nil {
@@ -260,7 +260,7 @@ func loggedSetsToProto(sets []domain.LoggedSet) []*trainingv1.LoggedSet {
 func musclesToProto(muscles []domain.MuscleGroup) []trainingv1.MuscleGroup {
 	values := make([]trainingv1.MuscleGroup, 0, len(muscles))
 	for _, muscle := range muscles {
-		values = append(values, trainingv1.StringToMuscleGroup(string(muscle)))
+		values = append(values, muscle)
 	}
 	return values
 }
@@ -268,7 +268,7 @@ func musclesToProto(muscles []domain.MuscleGroup) []trainingv1.MuscleGroup {
 func volumeFactsToProto(facts []domain.MuscleVolumeFact) []*trainingv1.MuscleVolumeFact {
 	items := make([]*trainingv1.MuscleVolumeFact, 0, len(facts))
 	for _, fact := range facts {
-		items = append(items, &trainingv1.MuscleVolumeFact{Muscle: trainingv1.StringToMuscleGroup(string(fact.Muscle)), SessionDirectSets: fact.SessionDirectSets, SessionIndirectSets: fact.SessionIndirectSets, SessionEffectiveSets: fact.SessionEffectiveSets, WeekToDateDirectSets: fact.WeekToDateDirectSets, WeekToDateIndirectSets: fact.WeekToDateIndirectSets, WeekToDateEffectiveSets: fact.WeekToDateEffectiveSets})
+		items = append(items, &trainingv1.MuscleVolumeFact{Muscle: fact.Muscle, SessionDirectSets: fact.SessionDirectSets, SessionIndirectSets: fact.SessionIndirectSets, SessionEffectiveSets: fact.SessionEffectiveSets, WeekToDateDirectSets: fact.WeekToDateDirectSets, WeekToDateIndirectSets: fact.WeekToDateIndirectSets, WeekToDateEffectiveSets: fact.WeekToDateEffectiveSets})
 	}
 	return items
 }
@@ -276,7 +276,7 @@ func volumeFactsToProto(facts []domain.MuscleVolumeFact) []*trainingv1.MuscleVol
 func muscleFeedbackToProto(feedback []domain.MuscleFeedback) []*trainingv1.MuscleFeedback {
 	items := make([]*trainingv1.MuscleFeedback, 0, len(feedback))
 	for _, item := range feedback {
-		protoFeedback := &trainingv1.MuscleFeedback{Muscle: trainingv1.StringToMuscleGroup(string(item.Muscle)), Workload: optionalFeedbackWorkloadProto(item.Workload), Notes: item.Notes}
+		protoFeedback := &trainingv1.MuscleFeedback{Muscle: item.Muscle, Workload: optionalFeedbackWorkloadProto(item.Workload), Notes: item.Notes}
 		if item.Soreness != nil {
 			protoFeedback.Soreness = new(int32(*item.Soreness))
 		}
@@ -291,7 +291,7 @@ func muscleFeedbackToProto(feedback []domain.MuscleFeedback) []*trainingv1.Muscl
 func suggestionsToProto(suggestions []domain.NextSessionSuggestion) []*trainingv1.NextSessionSuggestion {
 	items := make([]*trainingv1.NextSessionSuggestion, 0, len(suggestions))
 	for _, suggestion := range suggestions {
-		items = append(items, &trainingv1.NextSessionSuggestion{Muscle: trainingv1.StringToMuscleGroup(string(suggestion.Muscle)), Suggestion: suggestion.Suggestion, Status: trainingv1.StringToSuggestionStatus(suggestion.Status)})
+		items = append(items, &trainingv1.NextSessionSuggestion{Muscle: suggestion.Muscle, Suggestion: suggestion.Suggestion, Status: trainingv1.StringToSuggestionStatus(suggestion.Status)})
 	}
 	return items
 }
@@ -314,7 +314,7 @@ func mesocycleSessionsToProto(sessions []domain.MesocycleSessionSummary) []*trai
 func mesocycleExercisesToProto(exercises []domain.MesocycleExerciseSummary) []*trainingv1.MesocycleExercise {
 	items := make([]*trainingv1.MesocycleExercise, 0, len(exercises))
 	for _, exercise := range exercises {
-		items = append(items, &trainingv1.MesocycleExercise{Id: exercise.ID, Name: exercise.Name, Equipment: trainingv1.StringToEquipment(exercise.Equipment), PrimaryMuscle: trainingv1.StringToMuscleGroup(string(exercise.PrimaryMuscle)), Method: trainingv1.StringToTrainingMethod(string(exercise.Method)), TargetRepRange: exercise.TargetRepRange, Sets: loggedSetsToProto(exercise.Sets)})
+		items = append(items, &trainingv1.MesocycleExercise{Id: exercise.ID, Name: exercise.Name, Equipment: trainingv1.StringToEquipment(exercise.Equipment), PrimaryMuscle: exercise.PrimaryMuscle, Method: exercise.Method, TargetRepRange: exercise.TargetRepRange, Sets: loggedSetsToProto(exercise.Sets)})
 	}
 	return items
 }
@@ -330,7 +330,7 @@ func exerciseHistoryToProto(history []domain.ExerciseHistoryEntry) []*trainingv1
 func coefficientsFromProto(coefficients []*trainingv1.ExerciseMuscleCoefficient) []domain.ExerciseMuscleCoefficient {
 	items := make([]domain.ExerciseMuscleCoefficient, 0, len(coefficients))
 	for _, coefficient := range coefficients {
-		items = append(items, domain.ExerciseMuscleCoefficient{Muscle: domain.MuscleGroup(coefficient.GetMuscle().StringVal()), Coefficient: coefficient.GetCoefficient()})
+		items = append(items, domain.ExerciseMuscleCoefficient{Muscle: coefficient.GetMuscle(), Coefficient: coefficient.GetCoefficient()})
 	}
 	return items
 }

@@ -1,10 +1,12 @@
 package domain
 
-type TrainingMethod string
+import trainingv1 "workout-tracker/backend/pb/training/v1"
+
+type TrainingMethod = trainingv1.TrainingMethod
 
 const (
-	TrainingMethodRegular  TrainingMethod = "regular"
-	TrainingMethodMyoMatch TrainingMethod = "myo-match"
+	TrainingMethodRegular  = trainingv1.TrainingMethod_TRAINING_METHOD_REGULAR
+	TrainingMethodMyoMatch = trainingv1.TrainingMethod_TRAINING_METHOD_MYO_MATCH
 )
 
 var myoMatchSetEquivalents = map[int]float64{

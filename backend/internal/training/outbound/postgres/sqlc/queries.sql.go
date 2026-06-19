@@ -119,6 +119,51 @@ func (q *Queries) GetTodaySession(ctx context.Context) (GetTodaySessionRow, erro
 	return i, err
 }
 
+const insertDefaultExercise = `-- name: InsertDefaultExercise :execrows
+INSERT INTO exercises (id, name, primary_muscle, family_id, equipment)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (id) DO NOTHING
+`
+
+type InsertDefaultExerciseParams struct {
+	ID            string
+	Name          string
+	PrimaryMuscle string
+	FamilyID      sql.NullString
+	Equipment     string
+}
+
+func (q *Queries) InsertDefaultExercise(ctx context.Context, arg InsertDefaultExerciseParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, insertDefaultExercise,
+		arg.ID,
+		arg.Name,
+		arg.PrimaryMuscle,
+		arg.FamilyID,
+		arg.Equipment,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const insertDefaultExerciseMuscleCoefficient = `-- name: InsertDefaultExerciseMuscleCoefficient :exec
+INSERT INTO exercise_muscle_coefficients (exercise_id, muscle, coefficient)
+VALUES ($1, $2, $3)
+ON CONFLICT (exercise_id, muscle) DO NOTHING
+`
+
+type InsertDefaultExerciseMuscleCoefficientParams struct {
+	ExerciseID  string
+	Muscle      string
+	Coefficient float64
+}
+
+func (q *Queries) InsertDefaultExerciseMuscleCoefficient(ctx context.Context, arg InsertDefaultExerciseMuscleCoefficientParams) error {
+	_, err := q.db.ExecContext(ctx, insertDefaultExerciseMuscleCoefficient, arg.ExerciseID, arg.Muscle, arg.Coefficient)
+	return err
+}
+
 const insertExercise = `-- name: InsertExercise :exec
 INSERT INTO exercises (id, name, primary_muscle, family_id, equipment)
 VALUES ($1, $2, $3, $4, $5)

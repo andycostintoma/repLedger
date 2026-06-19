@@ -10,6 +10,7 @@ import (
 
 	"workout-tracker/backend/internal/training/domain"
 	"workout-tracker/backend/internal/training/outbound/postgres/sqlc"
+	trainingv1 "workout-tracker/backend/pb/training/v1"
 )
 
 func (r CatalogReadModel) GetTodayWorkout(ctx context.Context) (domain.TodayWorkout, error) {
@@ -150,9 +151,9 @@ func (r CatalogReadModel) plannedExercises(ctx context.Context, templateID strin
 			templateExerciseID: row.TemplateExerciseID,
 			exerciseID:         row.ExerciseID,
 			name:               row.Name,
-			primaryMuscle:      domain.MuscleGroup(row.PrimaryMuscle),
+			primaryMuscle:      trainingv1.StringToMuscleGroup(row.PrimaryMuscle),
 			equipment:          row.Equipment,
-			method:             domain.TrainingMethod(row.Method),
+			method:             trainingv1.StringToTrainingMethod(row.Method),
 			programmedSets:     int(row.ProgrammedSets),
 			targetRepRange:     row.TargetRepRange,
 		}
@@ -195,7 +196,7 @@ func (r CatalogReadModel) allMuscleFeedback(ctx context.Context, sessionID strin
 
 	feedback := map[domain.MuscleGroup]domain.MuscleFeedback{}
 	for _, row := range rows {
-		key := domain.MuscleGroup(row.Muscle)
+		key := trainingv1.StringToMuscleGroup(row.Muscle)
 		feedback[key] = domain.MuscleFeedback{Muscle: key, Soreness: nullInt32Ptr(row.Soreness), Pump: nullInt32Ptr(row.Pump), Workload: nullStringPtr(row.Workload), Notes: nullStringPtr(row.Notes)}
 	}
 	return feedback, nil
@@ -209,7 +210,7 @@ func (r CatalogReadModel) suggestions(ctx context.Context, sessionID string) ([]
 
 	suggestions := make([]domain.NextSessionSuggestion, 0, len(rows))
 	for _, row := range rows {
-		suggestions = append(suggestions, domain.NextSessionSuggestion{Muscle: domain.MuscleGroup(row.Muscle), Suggestion: row.Suggestion, Status: row.Status})
+		suggestions = append(suggestions, domain.NextSessionSuggestion{Muscle: trainingv1.StringToMuscleGroup(row.Muscle), Suggestion: row.Suggestion, Status: row.Status})
 	}
 	return suggestions, nil
 }
@@ -222,7 +223,7 @@ func (r CatalogReadModel) coefficientMap(ctx context.Context, exerciseID string,
 
 	coefficients := map[domain.MuscleGroup]float64{}
 	for _, row := range rows {
-		coefficients[domain.MuscleGroup(row.Muscle)] = row.Coefficient
+		coefficients[trainingv1.StringToMuscleGroup(row.Muscle)] = row.Coefficient
 	}
 	if len(coefficients) == 0 {
 		coefficients[fallback] = 1

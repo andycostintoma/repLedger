@@ -13,6 +13,7 @@ import (
 	"workout-tracker/backend/internal/training/app/command"
 	"workout-tracker/backend/internal/training/domain"
 	"workout-tracker/backend/internal/training/outbound/postgres/sqlc"
+	trainingv1 "workout-tracker/backend/pb/training/v1"
 )
 
 func (r CatalogReadModel) LogSet(ctx context.Context, cmd command.LogSet) error {
@@ -72,14 +73,15 @@ func (r CatalogReadModel) SaveExerciseFeedback(ctx context.Context, cmd command.
 }
 
 func (r CatalogReadModel) SaveMuscleFeedback(ctx context.Context, cmd command.SaveMuscleFeedback) error {
-	if !domain.IsMuscleGroup(string(cmd.Muscle)) {
-		return fmt.Errorf("unknown muscle group: %s", cmd.Muscle)
+	if cmd.Muscle.IsUnspecified() {
+		return fmt.Errorf("unknown muscle group: %s", cmd.Muscle.StringVal())
 	}
+	muscleValue := cmd.Muscle.StringVal()
 	now := time.Now().UTC()
 	err := r.queries.UpsertMuscleFeedback(ctx, sqlc.UpsertMuscleFeedbackParams{
-		ID:        fmt.Sprintf("%s-%s", cmd.SessionID, cmd.Muscle),
+		ID:        fmt.Sprintf("%s-%s", cmd.SessionID, muscleValue),
 		SessionID: cmd.SessionID,
-		Muscle:    string(cmd.Muscle),
+		Muscle:    muscleValue,
 		Soreness:  nullInt32(cmd.Soreness),
 		Pump:      nullInt32(cmd.Pump),
 		Workload:  nullString(cmd.Workload),
@@ -224,7 +226,7 @@ func (r CatalogReadModel) CreateExercise(ctx context.Context, cmd command.Create
 	}
 	defer rollback(tx)
 	queries := r.queries.WithTx(tx)
-	if err := queries.InsertExercise(ctx, sqlc.InsertExerciseParams{ID: id, Name: name, PrimaryMuscle: string(primaryMuscle), FamilyID: nullString(familyID), Equipment: cmd.Equipment}); err != nil {
+	if err := queries.InsertExercise(ctx, sqlc.InsertExerciseParams{ID: id, Name: name, PrimaryMuscle: primaryMuscle.StringVal(), FamilyID: nullString(familyID), Equipment: cmd.Equipment}); err != nil {
 		return "", fmt.Errorf("inserting exercise: %w", err)
 	}
 	if err := insertCoefficients(ctx, queries, id, coefficients); err != nil {
@@ -246,7 +248,7 @@ func (r CatalogReadModel) UpdateExerciseName(ctx context.Context, cmd command.Up
 }
 
 func (r CatalogReadModel) UpdateExerciseCoefficients(ctx context.Context, cmd command.UpdateExerciseCoefficients) error {
-	coefficients, primaryMuscle, familyID, err := buildCoefficientRows(cmd.FamilyID, cmd.Coefficients, "")
+	coefficients, primaryMuscle, familyID, err := buildCoefficientRows(cmd.FamilyID, cmd.Coefficients, trainingv1.MuscleGroup_MUSCLE_GROUP_UNKNOWN)
 	if err != nil {
 		return err
 	}
@@ -256,7 +258,7 @@ func (r CatalogReadModel) UpdateExerciseCoefficients(ctx context.Context, cmd co
 	}
 	defer rollback(tx)
 	queries := r.queries.WithTx(tx)
-	count, err := queries.UpdateExercisePrimaryAndFamily(ctx, sqlc.UpdateExercisePrimaryAndFamilyParams{ID: cmd.ExerciseID, PrimaryMuscle: string(primaryMuscle), FamilyID: nullString(familyID)})
+	count, err := queries.UpdateExercisePrimaryAndFamily(ctx, sqlc.UpdateExercisePrimaryAndFamilyParams{ID: cmd.ExerciseID, PrimaryMuscle: primaryMuscle.StringVal(), FamilyID: nullString(familyID)})
 	if err != nil {
 		return fmt.Errorf("updating exercise coefficients: %w", err)
 	}
@@ -273,18 +275,19 @@ func (r CatalogReadModel) UpdateExerciseCoefficients(ctx context.Context, cmd co
 }
 
 func (r CatalogReadModel) upsertGeneratedSuggestion(ctx context.Context, sessionID string, muscle domain.MuscleGroup, suggestion string, status string) error {
-	if !domain.IsMuscleGroup(string(muscle)) {
-		return fmt.Errorf("unknown muscle group: %s", muscle)
+	if muscle.IsUnspecified() {
+		return fmt.Errorf("unknown muscle group: %s", muscle.StringVal())
 	}
-	return r.queries.UpsertSuggestion(ctx, sqlc.UpsertSuggestionParams{ID: fmt.Sprintf("%s-%s", sessionID, muscle), SessionID: sessionID, Muscle: string(muscle), Suggestion: suggestion, Status: status, UpdatedAt: time.Now().UTC()})
+	muscleValue := muscle.StringVal()
+	return r.queries.UpsertSuggestion(ctx, sqlc.UpsertSuggestionParams{ID: fmt.Sprintf("%s-%s", sessionID, muscleValue), SessionID: sessionID, Muscle: muscleValue, Suggestion: suggestion, Status: status, UpdatedAt: time.Now().UTC()})
 }
 
 func (r CatalogReadModel) templateExercisePrimary(ctx context.Context, templateExerciseID string) (string, domain.MuscleGroup, error) {
 	row, err := r.queries.GetTemplateExercisePrimary(ctx, templateExerciseID)
 	if err != nil {
-		return "", "", err
+		return "", trainingv1.MuscleGroup_MUSCLE_GROUP_UNKNOWN, err
 	}
-	return row.Name, domain.MuscleGroup(row.PrimaryMuscle), nil
+	return row.Name, trainingv1.StringToMuscleGroup(row.PrimaryMuscle), nil
 }
 
 func buildCoefficientRows(familyID *string, explicit []domain.ExerciseMuscleCoefficient, primary domain.MuscleGroup) ([]domain.ExerciseMuscleCoefficient, domain.MuscleGroup, *string, error) {
@@ -300,24 +303,21 @@ func buildCoefficientRows(familyID *string, explicit []domain.ExerciseMuscleCoef
 	if len(explicit) > 0 {
 		coefficientMap = map[domain.MuscleGroup]float64{}
 		for _, row := range explicit {
-			if !domain.IsMuscleGroup(string(row.Muscle)) {
-				return nil, "", nil, fmt.Errorf("unknown muscle group: %s", row.Muscle)
+			if row.Muscle.IsUnspecified() {
+				return nil, trainingv1.MuscleGroup_MUSCLE_GROUP_UNKNOWN, nil, fmt.Errorf("unknown muscle group: %s", row.Muscle.StringVal())
 			}
 			if row.Coefficient != 0.5 && row.Coefficient != 0.75 && row.Coefficient != 1 {
-				return nil, "", nil, fmt.Errorf("invalid coefficient for %s", row.Muscle)
+				return nil, trainingv1.MuscleGroup_MUSCLE_GROUP_UNKNOWN, nil, fmt.Errorf("invalid coefficient for %s", row.Muscle.StringVal())
 			}
 			coefficientMap[row.Muscle] = row.Coefficient
 		}
 	}
-	if len(coefficientMap) == 0 && primary != "" {
-		if !domain.IsMuscleGroup(string(primary)) {
-			return nil, "", nil, fmt.Errorf("unknown muscle group: %s", primary)
-		}
+	if len(coefficientMap) == 0 && !primary.IsUnspecified() {
 		coefficientMap[primary] = 1
 	}
 	coefficients := coefficientsFromMap(coefficientMap)
 	if len(coefficients) == 0 {
-		return nil, "", nil, errors.New("choose at least one muscle coefficient")
+		return nil, trainingv1.MuscleGroup_MUSCLE_GROUP_UNKNOWN, nil, errors.New("choose at least one muscle coefficient")
 	}
 	var primaryMuscle domain.MuscleGroup
 	for _, coefficient := range coefficients {
@@ -326,8 +326,8 @@ func buildCoefficientRows(familyID *string, explicit []domain.ExerciseMuscleCoef
 			break
 		}
 	}
-	if primaryMuscle == "" {
-		return nil, "", nil, errors.New("choose at least one muscle with coefficient 1.0")
+	if primaryMuscle.IsUnspecified() {
+		return nil, trainingv1.MuscleGroup_MUSCLE_GROUP_UNKNOWN, nil, errors.New("choose at least one muscle with coefficient 1.0")
 	}
 	return coefficients, primaryMuscle, normalizedFamilyID, nil
 }
@@ -345,7 +345,7 @@ func normalizeFamilyID(familyID *string) *string {
 
 func insertCoefficients(ctx context.Context, queries *sqlc.Queries, exerciseID string, coefficients []domain.ExerciseMuscleCoefficient) error {
 	for _, coefficient := range coefficients {
-		if err := queries.InsertExerciseMuscleCoefficient(ctx, sqlc.InsertExerciseMuscleCoefficientParams{ExerciseID: exerciseID, Muscle: string(coefficient.Muscle), Coefficient: coefficient.Coefficient}); err != nil {
+		if err := queries.InsertExerciseMuscleCoefficient(ctx, sqlc.InsertExerciseMuscleCoefficientParams{ExerciseID: exerciseID, Muscle: coefficient.Muscle.StringVal(), Coefficient: coefficient.Coefficient}); err != nil {
 			return fmt.Errorf("inserting exercise coefficient: %w", err)
 		}
 	}

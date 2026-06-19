@@ -89,4 +89,7 @@ enum MuscleGroup {
   MUSCLE_GROUP_NECK_FLEXORS = 26
   [(common.v1.options.string_val) = "neck_flexors",
   (common.v1.options.friendly_string) = "Neck flexors"];
+  MUSCLE_GROUP_BRACHIALIS = 27
+  [(common.v1.options.string_val) = "brachialis",
+  (common.v1.options.friendly_string) = "Brachialis"];
 }

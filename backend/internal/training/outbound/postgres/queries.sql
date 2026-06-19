@@ -161,6 +161,11 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 INSERT INTO exercises (id, name, primary_muscle, family_id, equipment)
 VALUES ($1, $2, $3, $4, $5);
 
+-- name: InsertDefaultExercise :execrows
+INSERT INTO exercises (id, name, primary_muscle, family_id, equipment)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (id) DO NOTHING;
+
 -- name: UpdateExerciseName :execrows
 UPDATE exercises
 SET name = $2
@@ -180,6 +185,11 @@ INSERT INTO exercise_muscle_coefficients (exercise_id, muscle, coefficient)
 VALUES ($1, $2, $3)
 ON CONFLICT (exercise_id, muscle)
 DO UPDATE SET coefficient = excluded.coefficient;
+
+-- name: InsertDefaultExerciseMuscleCoefficient :exec
+INSERT INTO exercise_muscle_coefficients (exercise_id, muscle, coefficient)
+VALUES ($1, $2, $3)
+ON CONFLICT (exercise_id, muscle) DO NOTHING;
 
 -- name: GetTemplateExercisePrimary :one
 SELECT e.name, e.primary_muscle

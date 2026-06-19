@@ -30,6 +30,7 @@ const (
 	Equipment_EQUIPMENT_DUMBBELL            Equipment = 2
 	Equipment_EQUIPMENT_MACHINE             Equipment = 3
 	Equipment_EQUIPMENT_BODYWEIGHT_LOADABLE Equipment = 4
+	Equipment_EQUIPMENT_CABLE               Equipment = 5
 )
 
 // Enum value maps for Equipment.
@@ -40,6 +41,7 @@ var (
 		2: "EQUIPMENT_DUMBBELL",
 		3: "EQUIPMENT_MACHINE",
 		4: "EQUIPMENT_BODYWEIGHT_LOADABLE",
+		5: "EQUIPMENT_CABLE",
 	}
 	Equipment_value = map[string]int32{
 		"EQUIPMENT_UNKNOWN":             0,
@@ -47,6 +49,7 @@ var (
 		"EQUIPMENT_DUMBBELL":            2,
 		"EQUIPMENT_MACHINE":             3,
 		"EQUIPMENT_BODYWEIGHT_LOADABLE": 4,
+		"EQUIPMENT_CABLE":               5,
 	}
 )
 
@@ -81,13 +84,14 @@ var File_training_v1_enums_equipment_proto protoreflect.FileDescriptor
 
 const file_training_v1_enums_equipment_proto_rawDesc = "" +
 	"\n" +
-	"!training/v1/enums/equipment.proto\x12\vtraining.v1\x1a,common/v1/options/enum_friendly_string.proto\x1a'common/v1/options/enum_string_val.proto*\x9d\x02\n" +
+	"!training/v1/enums/equipment.proto\x12\vtraining.v1\x1a,common/v1/options/enum_friendly_string.proto\x1a'common/v1/options/enum_string_val.proto*\xc6\x02\n" +
 	"\tEquipment\x12-\n" +
 	"\x11EQUIPMENT_UNKNOWN\x10\x00\x1a\x16\x8a\xb5\x18\aunknown\x92\xb5\x18\aUnknown\x12-\n" +
 	"\x11EQUIPMENT_BARBELL\x10\x01\x1a\x16\x8a\xb5\x18\abarbell\x92\xb5\x18\aBarbell\x120\n" +
 	"\x12EQUIPMENT_DUMBBELL\x10\x02\x1a\x18\x8a\xb5\x18\bdumbbell\x92\xb5\x18\bDumbbell\x12-\n" +
 	"\x11EQUIPMENT_MACHINE\x10\x03\x1a\x16\x8a\xb5\x18\amachine\x92\xb5\x18\aMachine\x12Q\n" +
-	"\x1dEQUIPMENT_BODYWEIGHT_LOADABLE\x10\x04\x1a.\x8a\xb5\x18\x13bodyweight/loadable\x92\xb5\x18\x13Bodyweight/loadableB3Z1workout-tracker/backend/pb/training/v1;trainingv1b\x06proto3"
+	"\x1dEQUIPMENT_BODYWEIGHT_LOADABLE\x10\x04\x1a.\x8a\xb5\x18\x13bodyweight/loadable\x92\xb5\x18\x13Bodyweight/loadable\x12'\n" +
+	"\x0fEQUIPMENT_CABLE\x10\x05\x1a\x12\x8a\xb5\x18\x05cable\x92\xb5\x18\x05CableB3Z1workout-tracker/backend/pb/training/v1;trainingv1b\x06proto3"
 
 var (
 	file_training_v1_enums_equipment_proto_rawDescOnce sync.Once

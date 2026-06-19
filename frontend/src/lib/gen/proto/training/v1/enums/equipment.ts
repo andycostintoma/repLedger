@@ -14,6 +14,7 @@ export enum Equipment {
   EQUIPMENT_DUMBBELL = 2,
   EQUIPMENT_MACHINE = 3,
   EQUIPMENT_BODYWEIGHT_LOADABLE = 4,
+  EQUIPMENT_CABLE = 5,
   UNRECOGNIZED = -1,
 }
 
@@ -34,6 +35,9 @@ export function equipmentFromJSON(object: any): Equipment {
     case 4:
     case "EQUIPMENT_BODYWEIGHT_LOADABLE":
       return Equipment.EQUIPMENT_BODYWEIGHT_LOADABLE;
+    case 5:
+    case "EQUIPMENT_CABLE":
+      return Equipment.EQUIPMENT_CABLE;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -53,6 +57,8 @@ export function equipmentToJSON(object: Equipment): string {
       return "EQUIPMENT_MACHINE";
     case Equipment.EQUIPMENT_BODYWEIGHT_LOADABLE:
       return "EQUIPMENT_BODYWEIGHT_LOADABLE";
+    case Equipment.EQUIPMENT_CABLE:
+      return "EQUIPMENT_CABLE";
     case Equipment.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";

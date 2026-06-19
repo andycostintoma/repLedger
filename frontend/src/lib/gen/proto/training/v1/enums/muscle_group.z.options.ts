@@ -30,6 +30,7 @@ export const muscleGroupStringValMap: Partial<Record<MuscleGroup, string>> = {
 [MuscleGroup.MUSCLE_GROUP_GASTROCNEMIUS]: "gastrocnemius",
 [MuscleGroup.MUSCLE_GROUP_NECK_EXTENSORS]: "neck_extensors",
 [MuscleGroup.MUSCLE_GROUP_NECK_FLEXORS]: "neck_flexors",
+[MuscleGroup.MUSCLE_GROUP_BRACHIALIS]: "brachialis",
 };
 
 export const muscleGroupFriendlyStringMap: Partial<Record<MuscleGroup, string>> = {
@@ -60,6 +61,7 @@ export const muscleGroupFriendlyStringMap: Partial<Record<MuscleGroup, string>> 
 [MuscleGroup.MUSCLE_GROUP_GASTROCNEMIUS]: "Gastrocnemius",
 [MuscleGroup.MUSCLE_GROUP_NECK_EXTENSORS]: "Neck extensors",
 [MuscleGroup.MUSCLE_GROUP_NECK_FLEXORS]: "Neck flexors",
+[MuscleGroup.MUSCLE_GROUP_BRACHIALIS]: "Brachialis",
 };
 
 const muscleGroupReverseStringValMap: Record<string, MuscleGroup> = {
@@ -89,6 +91,7 @@ const muscleGroupReverseStringValMap: Record<string, MuscleGroup> = {
 "gastrocnemius": MuscleGroup.MUSCLE_GROUP_GASTROCNEMIUS,
 "neck_extensors": MuscleGroup.MUSCLE_GROUP_NECK_EXTENSORS,
 "neck_flexors": MuscleGroup.MUSCLE_GROUP_NECK_FLEXORS,
+"brachialis": MuscleGroup.MUSCLE_GROUP_BRACHIALIS,
 };
 
 export const muscleGroupStringVal = (value: MuscleGroup): string => muscleGroupStringValMap[value] ?? '';

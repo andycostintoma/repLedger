@@ -10,6 +10,7 @@ var _Equipment_StringValMap = map[Equipment]string{
 	Equipment_EQUIPMENT_DUMBBELL:            "dumbbell",
 	Equipment_EQUIPMENT_MACHINE:             "machine",
 	Equipment_EQUIPMENT_BODYWEIGHT_LOADABLE: "bodyweight/loadable",
+	Equipment_EQUIPMENT_CABLE:               "cable",
 }
 
 var _Equipment_ReverseStringValMap = map[string]Equipment{
@@ -18,6 +19,7 @@ var _Equipment_ReverseStringValMap = map[string]Equipment{
 	"dumbbell":            Equipment_EQUIPMENT_DUMBBELL,
 	"machine":             Equipment_EQUIPMENT_MACHINE,
 	"bodyweight/loadable": Equipment_EQUIPMENT_BODYWEIGHT_LOADABLE,
+	"cable":               Equipment_EQUIPMENT_CABLE,
 }
 
 var _Equipment_FriendlyStringMap = map[Equipment]string{
@@ -26,6 +28,7 @@ var _Equipment_FriendlyStringMap = map[Equipment]string{
 	Equipment_EQUIPMENT_DUMBBELL:            "Dumbbell",
 	Equipment_EQUIPMENT_MACHINE:             "Machine",
 	Equipment_EQUIPMENT_BODYWEIGHT_LOADABLE: "Bodyweight/loadable",
+	Equipment_EQUIPMENT_CABLE:               "Cable",
 }
 
 func (x Equipment) StringVal() string {

@@ -36,6 +36,7 @@ export enum MuscleGroup {
   MUSCLE_GROUP_GASTROCNEMIUS = 24,
   MUSCLE_GROUP_NECK_EXTENSORS = 25,
   MUSCLE_GROUP_NECK_FLEXORS = 26,
+  MUSCLE_GROUP_BRACHIALIS = 27,
   UNRECOGNIZED = -1,
 }
 
@@ -122,6 +123,9 @@ export function muscleGroupFromJSON(object: any): MuscleGroup {
     case 26:
     case "MUSCLE_GROUP_NECK_FLEXORS":
       return MuscleGroup.MUSCLE_GROUP_NECK_FLEXORS;
+    case 27:
+    case "MUSCLE_GROUP_BRACHIALIS":
+      return MuscleGroup.MUSCLE_GROUP_BRACHIALIS;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -185,6 +189,8 @@ export function muscleGroupToJSON(object: MuscleGroup): string {
       return "MUSCLE_GROUP_NECK_EXTENSORS";
     case MuscleGroup.MUSCLE_GROUP_NECK_FLEXORS:
       return "MUSCLE_GROUP_NECK_FLEXORS";
+    case MuscleGroup.MUSCLE_GROUP_BRACHIALIS:
+      return "MUSCLE_GROUP_BRACHIALIS";
     case MuscleGroup.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";

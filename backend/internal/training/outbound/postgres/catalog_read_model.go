@@ -11,6 +11,7 @@ import (
 
 	"workout-tracker/backend/internal/training/domain"
 	"workout-tracker/backend/internal/training/outbound/postgres/sqlc"
+	trainingv1 "workout-tracker/backend/pb/training/v1"
 )
 
 type CatalogReadModel struct {
@@ -63,7 +64,7 @@ func (r CatalogReadModel) listExercises(ctx context.Context) ([]domain.ExerciseS
 			continue
 		}
 		coefficientsByExerciseID[coefficient.ExerciseID] = append(coefficientsByExerciseID[coefficient.ExerciseID], domain.ExerciseMuscleCoefficient{
-			Muscle:      domain.MuscleGroup(coefficient.Muscle),
+			Muscle:      trainingv1.StringToMuscleGroup(coefficient.Muscle),
 			Coefficient: coefficient.Coefficient,
 		})
 	}
@@ -73,7 +74,7 @@ func (r CatalogReadModel) listExercises(ctx context.Context) ([]domain.ExerciseS
 		exercise := domain.ExerciseSummary{
 			ID:                 row.ID,
 			Name:               row.Name,
-			PrimaryMuscle:      domain.MuscleGroup(row.PrimaryMuscle),
+			PrimaryMuscle:      trainingv1.StringToMuscleGroup(row.PrimaryMuscle),
 			Equipment:          row.Equipment,
 			MuscleCoefficients: append([]domain.ExerciseMuscleCoefficient(nil), coefficientsByExerciseID[row.ID]...),
 		}
@@ -157,8 +158,8 @@ func exerciseFamilySummaries() []domain.ExerciseFamilySummary {
 	for _, family := range domain.ExerciseFamilies {
 		coefficients := coefficientsFromMap(family.Coefficients)
 		families = append(families, domain.ExerciseFamilySummary{
-			ID:           family.ID,
-			Name:         family.Name,
+			ID:           family.ID.StringVal(),
+			Name:         family.ID.FriendlyString(),
 			Category:     family.Category,
 			Coefficients: coefficients,
 			Notes:        family.Notes,
@@ -210,8 +211,8 @@ func (r CatalogReadModel) sessionExercises(ctx context.Context, sessionID string
 			ID:             row.ID,
 			Name:           row.Name,
 			Equipment:      row.Equipment,
-			PrimaryMuscle:  domain.MuscleGroup(row.PrimaryMuscle),
-			Method:         domain.TrainingMethod(row.Method),
+			PrimaryMuscle:  trainingv1.StringToMuscleGroup(row.PrimaryMuscle),
+			Method:         trainingv1.StringToTrainingMethod(row.Method),
 			TargetRepRange: row.TargetRepRange,
 		}
 		sets, err := r.loggedSets(ctx, sessionID, exercise.ID)

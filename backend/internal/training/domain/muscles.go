@@ -1,34 +1,37 @@
 package domain
 
-type MuscleGroup string
+import trainingv1 "workout-tracker/backend/pb/training/v1"
+
+type MuscleGroup = trainingv1.MuscleGroup
 
 const (
-	MuscleQuadsVasti             MuscleGroup = "quads_vasti"
-	MuscleRectusFemoris          MuscleGroup = "rectus_femoris"
-	MuscleAdductors              MuscleGroup = "adductors"
-	MuscleHamstringsBiarticular  MuscleGroup = "hamstrings_biarticular"
-	MuscleBicepsFemorisShortHead MuscleGroup = "biceps_femoris_short_head"
-	MuscleGluteMax               MuscleGroup = "glute_max"
-	MuscleGluteMedMin            MuscleGroup = "glute_med_min"
-	MuscleErectorSpinae          MuscleGroup = "erector_spinae"
-	MuscleAbs                    MuscleGroup = "abs"
-	MuscleWristFlexors           MuscleGroup = "wrist_flexors"
-	MuscleWristExtensors         MuscleGroup = "wrist_extensors"
-	MuscleBrachioradialis        MuscleGroup = "brachioradialis"
-	MuscleBiceps                 MuscleGroup = "biceps"
-	MuscleTricepsLateralMedial   MuscleGroup = "triceps_lateral_medial"
-	MuscleTricepsLongHead        MuscleGroup = "triceps_long_head"
-	MuscleFrontDelts             MuscleGroup = "front_delts"
-	MuscleSideDelts              MuscleGroup = "side_delts"
-	MuscleRearDelts              MuscleGroup = "rear_delts"
-	MuscleChest                  MuscleGroup = "chest"
-	MuscleLats                   MuscleGroup = "lats"
-	MuscleUpperBack              MuscleGroup = "upper_back"
-	MuscleUpperTraps             MuscleGroup = "upper_traps"
-	MuscleSoleus                 MuscleGroup = "soleus"
-	MuscleGastrocnemius          MuscleGroup = "gastrocnemius"
-	MuscleNeckExtensors          MuscleGroup = "neck_extensors"
-	MuscleNeckFlexors            MuscleGroup = "neck_flexors"
+	MuscleQuadsVasti             = trainingv1.MuscleGroup_MUSCLE_GROUP_QUADS_VASTI
+	MuscleRectusFemoris          = trainingv1.MuscleGroup_MUSCLE_GROUP_RECTUS_FEMORIS
+	MuscleAdductors              = trainingv1.MuscleGroup_MUSCLE_GROUP_ADDUCTORS
+	MuscleHamstringsBiarticular  = trainingv1.MuscleGroup_MUSCLE_GROUP_HAMSTRINGS_BIARTICULAR
+	MuscleBicepsFemorisShortHead = trainingv1.MuscleGroup_MUSCLE_GROUP_BICEPS_FEMORIS_SHORT_HEAD
+	MuscleGluteMax               = trainingv1.MuscleGroup_MUSCLE_GROUP_GLUTE_MAX
+	MuscleGluteMedMin            = trainingv1.MuscleGroup_MUSCLE_GROUP_GLUTE_MED_MIN
+	MuscleErectorSpinae          = trainingv1.MuscleGroup_MUSCLE_GROUP_ERECTOR_SPINAE
+	MuscleAbs                    = trainingv1.MuscleGroup_MUSCLE_GROUP_ABS
+	MuscleWristFlexors           = trainingv1.MuscleGroup_MUSCLE_GROUP_WRIST_FLEXORS
+	MuscleWristExtensors         = trainingv1.MuscleGroup_MUSCLE_GROUP_WRIST_EXTENSORS
+	MuscleBrachioradialis        = trainingv1.MuscleGroup_MUSCLE_GROUP_BRACHIORADIALIS
+	MuscleBiceps                 = trainingv1.MuscleGroup_MUSCLE_GROUP_BICEPS
+	MuscleTricepsLateralMedial   = trainingv1.MuscleGroup_MUSCLE_GROUP_TRICEPS_LATERAL_MEDIAL
+	MuscleTricepsLongHead        = trainingv1.MuscleGroup_MUSCLE_GROUP_TRICEPS_LONG_HEAD
+	MuscleFrontDelts             = trainingv1.MuscleGroup_MUSCLE_GROUP_FRONT_DELTS
+	MuscleSideDelts              = trainingv1.MuscleGroup_MUSCLE_GROUP_SIDE_DELTS
+	MuscleRearDelts              = trainingv1.MuscleGroup_MUSCLE_GROUP_REAR_DELTS
+	MuscleChest                  = trainingv1.MuscleGroup_MUSCLE_GROUP_CHEST
+	MuscleLats                   = trainingv1.MuscleGroup_MUSCLE_GROUP_LATS
+	MuscleUpperBack              = trainingv1.MuscleGroup_MUSCLE_GROUP_UPPER_BACK
+	MuscleUpperTraps             = trainingv1.MuscleGroup_MUSCLE_GROUP_UPPER_TRAPS
+	MuscleSoleus                 = trainingv1.MuscleGroup_MUSCLE_GROUP_SOLEUS
+	MuscleGastrocnemius          = trainingv1.MuscleGroup_MUSCLE_GROUP_GASTROCNEMIUS
+	MuscleNeckExtensors          = trainingv1.MuscleGroup_MUSCLE_GROUP_NECK_EXTENSORS
+	MuscleNeckFlexors            = trainingv1.MuscleGroup_MUSCLE_GROUP_NECK_FLEXORS
+	MuscleBrachialis             = trainingv1.MuscleGroup_MUSCLE_GROUP_BRACHIALIS
 )
 
 var MuscleGroups = []MuscleGroup{
@@ -58,13 +61,9 @@ var MuscleGroups = []MuscleGroup{
 	MuscleGastrocnemius,
 	MuscleNeckExtensors,
 	MuscleNeckFlexors,
+	MuscleBrachialis,
 }
 
 func IsMuscleGroup(value string) bool {
-	for _, muscle := range MuscleGroups {
-		if string(muscle) == value {
-			return true
-		}
-	}
-	return false
+	return !trainingv1.StringToMuscleGroup(value).IsUnspecified()
 }

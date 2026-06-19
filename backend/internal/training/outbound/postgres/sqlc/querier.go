@@ -15,6 +15,8 @@ type Querier interface {
 	GetTemplateExercisePrimary(ctx context.Context, id string) (GetTemplateExercisePrimaryRow, error)
 	GetTemplateMesocycle(ctx context.Context, id string) (GetTemplateMesocycleRow, error)
 	GetTodaySession(ctx context.Context) (GetTodaySessionRow, error)
+	InsertDefaultExercise(ctx context.Context, arg InsertDefaultExerciseParams) (int64, error)
+	InsertDefaultExerciseMuscleCoefficient(ctx context.Context, arg InsertDefaultExerciseMuscleCoefficientParams) error
 	InsertExercise(ctx context.Context, arg InsertExerciseParams) error
 	InsertExerciseMuscleCoefficient(ctx context.Context, arg InsertExerciseMuscleCoefficientParams) error
 	InsertMesocycle(ctx context.Context, arg InsertMesocycleParams) error

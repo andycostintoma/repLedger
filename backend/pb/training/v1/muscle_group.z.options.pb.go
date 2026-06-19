@@ -32,6 +32,7 @@ var _MuscleGroup_StringValMap = map[MuscleGroup]string{
 	MuscleGroup_MUSCLE_GROUP_GASTROCNEMIUS:             "gastrocnemius",
 	MuscleGroup_MUSCLE_GROUP_NECK_EXTENSORS:            "neck_extensors",
 	MuscleGroup_MUSCLE_GROUP_NECK_FLEXORS:              "neck_flexors",
+	MuscleGroup_MUSCLE_GROUP_BRACHIALIS:                "brachialis",
 }
 
 var _MuscleGroup_ReverseStringValMap = map[string]MuscleGroup{
@@ -61,6 +62,7 @@ var _MuscleGroup_ReverseStringValMap = map[string]MuscleGroup{
 	"gastrocnemius":             MuscleGroup_MUSCLE_GROUP_GASTROCNEMIUS,
 	"neck_extensors":            MuscleGroup_MUSCLE_GROUP_NECK_EXTENSORS,
 	"neck_flexors":              MuscleGroup_MUSCLE_GROUP_NECK_FLEXORS,
+	"brachialis":                MuscleGroup_MUSCLE_GROUP_BRACHIALIS,
 }
 
 var _MuscleGroup_FriendlyStringMap = map[MuscleGroup]string{
@@ -91,6 +93,7 @@ var _MuscleGroup_FriendlyStringMap = map[MuscleGroup]string{
 	MuscleGroup_MUSCLE_GROUP_GASTROCNEMIUS:             "Gastrocnemius",
 	MuscleGroup_MUSCLE_GROUP_NECK_EXTENSORS:            "Neck extensors",
 	MuscleGroup_MUSCLE_GROUP_NECK_FLEXORS:              "Neck flexors",
+	MuscleGroup_MUSCLE_GROUP_BRACHIALIS:                "Brachialis",
 }
 
 func (x MuscleGroup) StringVal() string {

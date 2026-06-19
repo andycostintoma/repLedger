@@ -23,4 +23,7 @@ enum Equipment {
   EQUIPMENT_BODYWEIGHT_LOADABLE = 4
   [(common.v1.options.string_val) = "bodyweight/loadable",
   (common.v1.options.friendly_string) = "Bodyweight/loadable"];
+  EQUIPMENT_CABLE = 5
+  [(common.v1.options.string_val) = "cable",
+  (common.v1.options.friendly_string) = "Cable"];
 }

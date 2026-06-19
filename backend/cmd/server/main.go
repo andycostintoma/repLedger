@@ -17,6 +17,7 @@ import (
 
 	training "workout-tracker/backend"
 	inboundgrpc "workout-tracker/backend/internal/training/inbound/grpc"
+	"workout-tracker/backend/internal/training/outbound/postgres"
 )
 
 type config struct {
@@ -47,6 +48,9 @@ func run(ctx context.Context, cfg config, logger *slog.Logger) error {
 	defer cancel()
 	if err := db.PingContext(pingCtx); err != nil {
 		return fmt.Errorf("pinging postgres: %w", err)
+	}
+	if err := postgres.SeedDefaultExercises(ctx, db); err != nil {
+		return fmt.Errorf("seeding default exercises: %w", err)
 	}
 
 	app := training.NewApp(db, logger)
