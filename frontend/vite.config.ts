@@ -10,9 +10,9 @@ export default defineConfig({
     SvelteKitPWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Workout Tracker',
-        short_name: 'Workout',
-        description: 'Internal training logger for workout sessions.',
+        name: 'repLedger',
+        short_name: 'repLedger',
+        description: 'Log workouts, track performance, and account for training volume.',
         theme_color: '#111827',
         background_color: '#0f172a',
         display: 'standalone',

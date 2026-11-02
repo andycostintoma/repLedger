@@ -1,3 +1,3 @@
 <svelte:head>
-  <title>Workout Tracker</title>
+  <title>repLedger</title>
 </svelte:head>

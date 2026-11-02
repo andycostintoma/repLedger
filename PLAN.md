@@ -1,4 +1,4 @@
-# Workout Tracker Plan
+# repLedger Plan
 
 ## Decisions Taken
 
