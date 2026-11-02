@@ -89,3 +89,7 @@ These are development checks, not a claim of comprehensive test coverage.
 Near-term work is reliable logging, editable catalogs/templates, accurate muscle-volume accounting, and tests. Migration of older local SQLite logs remains an explicit decision; PostgreSQL is the active persistence layer, and existing logs should not be discarded implicitly.
 
 Nutrition integrations, live coaching, and automatic progression are outside the current V1 scope. See [PLAN.md](PLAN.md) for the detailed backlog and [AGENTS.md](AGENTS.md) for architecture constraints.
+
+## License
+
+[MIT](LICENSE).
